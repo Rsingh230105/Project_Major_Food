@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Detector - Multi-View Analysis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+    <style>
+        .drop-zone {
+            transition: all 0.3s ease;
+        }
+        .drop-zone.dragover {
+            transform: scale(1.02);
+            border-color: #60A5FA;
+            background-color: #EFF6FF;
+        }
+        .preview-image {
+            transition: transform 0.3s ease;
+        }
+        .preview-image:hover {
+            transform: scale(1.05);
+        }
+        @keyframes slideIn {
+            from { transform: translateX(-20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        .slide-in {
+            animation: slideIn 0.3s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+    <div class="py-8 px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="max-w-4xl mx-auto text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-900 mb-4">
+                <span class="text-blue-600">Food</span> Detector
+            </h1>
+            <p class="text-lg text-gray-600">
+                Upload multiple views of your food product for comprehensive authenticity analysis
+            </p>
+        </div>
+
+        <!-- Main Content -->
+        <div class="max-w-4xl mx-auto">
+            <div class="bg-white shadow-xl rounded-2xl overflow-hidden">
+                <div class="p-6 sm:p-8">
+                    <form id="uploadForm" class="space-y-6">
+                        {% csrf_token %}
+                        <!-- Brand Name Input -->
+                        <div>
+                            <label for="brandName" class="block text-sm font-medium text-gray-700 mb-2">
+                                Brand Name
+                            </label>
+                            <input type="text" id="brandName" name="brand_name" required
+                                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+
+                        <!-- Image Upload Sections -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Front View -->
+                            <div class="image-upload-section">
+                                <h3 class="text-lg font-medium text-gray-900 mb-2">Front View (Required)</h3>
+                                <div class="drop-zone border-4 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                                    <div class="upload-content">
+                                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                        </svg>
+                                        <p class="mt-2 text-sm text-gray-500">Click to upload front view</p>
+                                    </div>
+                                    <div class="preview-container hidden">
+                                        <img class="preview-image max-h-48 mx-auto" src="" alt="Preview">
+                                        <button type="button" class="remove-image mt-2 text-red-500 text-sm">Remove</button>
+                                    </div>
+                                    <input type="file" class="hidden" name="images[]" accept="image/*" required data-view="front">
+                                    <input type="hidden" name="view_types[]" value="front">
+                                </div>
+                            </div>
+
+                            <!-- Back View -->
+                            <div class="image-upload-section">
+                                <h3 class="text-lg font-medium text-gray-900 mb-2">Back View (Required)</h3>
+                                <div class="drop-zone border-4 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                                    <div class="upload-content">
+                                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                        </svg>
+                                        <p class="mt-2 text-sm text-gray-500">Click to upload back view</p>
+                                    </div>
+                                    <div class="preview-container hidden">
+                                        <img class="preview-image max-h-48 mx-auto" src="" alt="Preview">
+                                        <button type="button" class="remove-image mt-2 text-red-500 text-sm">Remove</button>
+                                    </div>
+                                    <input type="file" class="hidden" name="images[]" accept="image/*" required data-view="back">
+                                    <input type="hidden" name="view_types[]" value="back">
+                                </div>
+                            </div>
+
+                            <!-- Side View -->
+                            <div class="image-upload-section">
+                                <h3 class="text-lg font-medium text-gray-900 mb-2">Side View (Optional)</h3>
+                                <div class="drop-zone border-4 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                                    <div class="upload-content">
+                                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                        </svg>
+                                        <p class="mt-2 text-sm text-gray-500">Click to upload side view</p>
+                                    </div>
+                                    <div class="preview-container hidden">
+                                        <img class="preview-image max-h-48 mx-auto" src="" alt="Preview">
+                                        <button type="button" class="remove-image mt-2 text-red-500 text-sm">Remove</button>
+                                    </div>
+                                    <input type="file" class="hidden" name="images[]" accept="image/*" data-view="side">
+                                    <input type="hidden" name="view_types[]" value="side">
+                                </div>
+                            </div>
+
+                            <!-- Barcode View -->
+                            <div class="image-upload-section">
+                                <h3 class="text-lg font-medium text-gray-900 mb-2">Barcode/QR (Optional)</h3>
+                                <div class="drop-zone border-4 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                                    <div class="upload-content">
+                                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                        </svg>
+                                        <p class="mt-2 text-sm text-gray-500">Click to upload barcode/QR</p>
+                                    </div>
+                                    <div class="preview-container hidden">
+                                        <img class="preview-image max-h-48 mx-auto" src="" alt="Preview">
+                                        <button type="button" class="remove-image mt-2 text-red-500 text-sm">Remove</button>
+                                    </div>
+                                    <input type="file" class="hidden" name="images[]" accept="image/*" data-view="barcode">
+                                    <input type="hidden" name="view_types[]" value="barcode">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button type="submit" id="analyzeBtn" class="w-full bg-blue-600 text-white rounded-lg px-6 py-3 text-lg font-semibold hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transform transition-all duration-300 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                            Analyze All Images
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Results Section -->
+                <div id="resultSection" class="hidden border-t border-gray-200">
+                    <div class="p-6 sm:p-8 bg-gray-50">
+                        <h3 class="text-xl font-semibold text-gray-900 mb-4">Analysis Results</h3>
+                        
+                        <!-- Loading Animation -->
+                        <div id="loadingSection" class="hidden text-center py-8">
+                            <lottie-player src="https://lottie.host/c7643828-7d69-4734-9b44-cea9e1271fbf/tDpGrR8Esd.json" 
+                                background="transparent" speed="1" style="height: 150px; margin: 0 auto;" loop autoplay>
+                            </lottie-player>
+                            <p class="text-gray-600 mt-4">Analyzing your image...</p>
+                        </div>
+
+                        <!-- Results Content -->
+                        <div id="resultContent" class="space-y-4">
+                            <!-- Results will be injected here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('uploadForm');
+            const analyzeBtn = document.getElementById('analyzeBtn');
+            const loadingSection = document.getElementById('loadingSection');
+            const resultSection = document.getElementById('resultSection');
+            const resultContent = document.getElementById('resultContent');
+            const dropZones = document.querySelectorAll('.drop-zone');
+            const requiredViews = ['front', 'back'];
+
+            // Initialize each drop zone
+            dropZones.forEach(zone => {
+                const input = zone.querySelector('input[type="file"]');
+                const preview = zone.querySelector('.preview-container');
+                const uploadContent = zone.querySelector('.upload-content');
+                const previewImage = preview.querySelector('img');
+                const removeBtn = preview.querySelector('.remove-image');
+                const viewType = input.dataset.view;
+
+                // Click to upload
+                zone.addEventListener('click', () => input.click());
+
+                // Drag and drop handlers
+                zone.addEventListener('dragover', e => {
+                    e.preventDefault();
+                    zone.classList.add('dragover');
+                });
+
+                zone.addEventListener('dragleave', () => {
+                    zone.classList.remove('dragover');
+                });
+
+                zone.addEventListener('drop', e => {
+                    e.preventDefault();
+                    zone.classList.remove('dragover');
+                    if (e.dataTransfer.files.length) {
+                        handleFile(e.dataTransfer.files[0], input, preview, uploadContent, previewImage);
+                    }
+                });
+
+                // File input change handler
+                input.addEventListener('change', () => {
+                    if (input.files.length) {
+                        handleFile(input.files[0], input, preview, uploadContent, previewImage);
+                    }
+                });
+
+                // Remove button handler
+                removeBtn.addEventListener('click', e => {
+                    e.stopPropagation();
+                    input.value = '';
+                    preview.classList.add('hidden');
+                    uploadContent.classList.remove('hidden');
+                    updateSubmitButton();
+                });
+            });
+
+            function handleFile(file, input, preview, uploadContent, previewImage) {
+                if (validateFile(file)) {
+                    const reader = new FileReader();
+                    reader.onload = e => {
+                        previewImage.src = e.target.result;
+                        preview.classList.remove('hidden');
+                        uploadContent.classList.add('hidden');
+                    };
+                    reader.readAsDataURL(file);
+                    updateSubmitButton();
+                }
+            }
+
+            function validateFile(file) {
+                const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+                const maxSize = 5 * 1024 * 1024; // 5MB
+
+                if (!validTypes.includes(file.type)) {
+                    alert('Please upload a valid image file (JPG, JPEG, or PNG)');
+                    return false;
+                }
+
+                if (file.size > maxSize) {
+                    alert('File size must be less than 5MB');
+                    return false;
+                }
+
+                return true;
+            }
+
+            function updateSubmitButton() {
+                const brandName = document.getElementById('brandName').value.trim();
+                const hasRequiredImages = requiredViews.every(view => {
+                    const input = document.querySelector(`input[data-view="${view}"]`);
+                    return input.files.length > 0;
+                });
+                analyzeBtn.disabled = !(brandName && hasRequiredImages);
+            }
+
+            // Brand name input handler
+            document.getElementById('brandName').addEventListener('input', updateSubmitButton);
+
+            // Form submission
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const formData = new FormData();
+                formData.append('brand_name', document.getElementById('brandName').value);
+                
+                // Append all uploaded images with their view types
+                document.querySelectorAll('input[type="file"]').forEach((input, index) => {
+                    if (input.files.length > 0) {
+                        const file = input.files[0];
+                        const viewType = input.dataset.view;
+                        formData.append(`images[]`, file);
+                        formData.append(`view_types[]`, viewType);
+                        console.log(`Appending ${file.name} as ${viewType}`);
+                    }
+                });
+
+                // Show loading state
+                loadingSection.classList.remove('hidden');
+                resultSection.classList.remove('hidden');
+                resultContent.classList.add('hidden');
+                analyzeBtn.disabled = true;
+
+                try {
+                    console.log("Submitting form data...");
+                    const response = await fetch('/api/detect/', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    console.log("Response received:", response.status);
+                    const data = await response.json();
+                    console.log("Response data:", data);
+
+                    // Hide loading state
+                    loadingSection.classList.add('hidden');
+                    resultContent.classList.remove('hidden');
+
+                    // Display results
+                    resultContent.innerHTML = `
+                        <div class="bg-white rounded-lg shadow-sm p-6 space-y-6">
+                            <div class="text-center pb-4 border-b">
+                                <h4 class="text-xl font-semibold text-gray-900">${data.brand_name || 'Unknown Brand'}</h4>
+                                <p class="text-gray-500 mt-1">Analysis Complete</p>
+                            </div>
+
+                            ${data.error ? `
+                                <div class="p-4 bg-red-50 text-red-600 rounded-lg">
+                                    <p>${data.error}</p>
+                                </div>
+                            ` : `
+                                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                    <span class="text-lg font-medium">Final Prediction:</span>
+                                    <span class="text-xl font-bold ${data.final_prediction === 'REAL' ? 'text-green-600' : 'text-red-600'}">
+                                        ${data.final_prediction || 'Unknown'}
+                                    </span>
+                                </div>
+
+                                <div class="flex items-center justify-between p-4 bg-blue-50 rounded-lg">
+                                    <span class="text-lg font-medium">Overall Confidence:</span>
+                                    <span class="text-xl font-bold text-blue-600">
+                                        ${data.overall_confidence || 0}%
+                                    </span>
+                                </div>
+
+                                ${data.brand_match ? `
+                                    <div class="flex items-center justify-between p-4 bg-green-50 rounded-lg">
+                                        <span class="text-lg font-medium">Brand Match:</span>
+                                        <span class="text-xl font-bold text-green-600">Found</span>
+                                    </div>
+                                ` : ''}
+
+                                ${data.processing_time ? `
+                                    <div class="text-sm text-gray-500">
+                                        Processing Time: ${data.processing_time}s
+                                    </div>
+                                ` : ''}
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                                    ${data.images ? data.images.map(img => `
+                                        <div class="border rounded-lg p-4 slide-in">
+                                            <h5 class="font-medium text-gray-900 mb-2">${img.view_type_display || img.view_type}</h5>
+                                            <p class="text-sm text-gray-600">Prediction: ${img.prediction || 'Unknown'}</p>
+                                            <p class="text-sm text-gray-600">Confidence: ${img.confidence || 0}%</p>
+                                            ${img.detected_text ? `
+                                                <div class="mt-2 pt-2 border-t">
+                                                    <p class="text-sm text-gray-500">Detected Text:</p>
+                                                    <p class="text-sm">${img.detected_text}</p>
+                                                </div>
+                                            ` : ''}
+                                        </div>
+                                    `).join('') : ''}
+                                </div>
+
+                                ${data.ocr_results ? `
+                                    <div class="mt-4 pt-4 border-t">
+                                        <h6 class="font-medium text-gray-900 mb-2">OCR Results</h6>
+                                        <div class="space-y-2 text-sm text-gray-600">
+                                            ${data.ocr_results.extracted_brands?.length ? `
+                                                <p>Detected Brands: ${data.ocr_results.extracted_brands.join(', ')}</p>
+                                            ` : ''}
+                                            ${data.ocr_results.expiry_dates?.length ? `
+                                                <p>Expiry Dates: ${data.ocr_results.expiry_dates.join(', ')}</p>
+                                            ` : ''}
+                                            ${data.ocr_results.batch_numbers?.length ? `
+                                                <p>Batch Numbers: ${data.ocr_results.batch_numbers.join(', ')}</p>
+                                            ` : ''}
+                                            ${data.ocr_results.mrp_values?.length ? `
+                                                <p>MRP Values: ${data.ocr_results.mrp_values.join(', ')}</p>
+                                            ` : ''}
+                                        </div>
+                                    </div>
+                                ` : ''}
+                            `}
+                            </div>
+                        </div>
+                    `;
+
+                } catch (error) {
+                    console.error('Error:', error);
+                    loadingSection.classList.add('hidden');
+                    resultContent.classList.remove('hidden');
+                    resultContent.innerHTML = `
+                        <div class="bg-red-50 border border-red-200 rounded-lg p-4 text-red-600">
+                            Error: Unable to process images. Please try again.
+                        </div>
+                    `;
+                }
+
+                analyzeBtn.disabled = false;
+            });
+        });
+    </script>
+</body>
+</html>
