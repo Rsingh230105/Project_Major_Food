@@ -47,7 +47,7 @@
             <div class="bg-white shadow-xl rounded-2xl overflow-hidden">
                 <div class="p-6 sm:p-8">
                     <form id="uploadForm" class="space-y-6">
-                        {% csrf_token %}
+                        {% csrf_token %}  <!-- Django CSRF Token -->
                         <!-- Brand Name Input -->
                         <div>
                             <label for="brandName" class="block text-sm font-medium text-gray-700 mb-2">
@@ -291,13 +291,62 @@
 
                 try {
                     console.log("Submitting form data...");
+                    // Get CSRF token from cookie
+                    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+                    
                     const response = await fetch('/api/detect/', {
                         method: 'POST',
+                        headers: {
+                            'X-CSRFToken': csrftoken
+                        },
                         body: formData
                     });
 
                     console.log("Response received:", response.status);
                     const data = await response.json();
+                    
+                    // Hide loading, show results
+                    loadingSection.classList.add('hidden');
+                    resultContent.classList.remove('hidden');
+                    
+                    // Format confidence as percentage
+                    const confidence = (data.overall_confidence * 100).toFixed(1);
+                    
+                    // Update result content
+                    resultContent.innerHTML = `
+                        <div class="space-y-6">
+                            <div class="text-center">
+                                <h2 class="text-2xl font-bold text-gray-900">${data.brand_name || document.getElementById('brandName').value}</h2>
+                                <p class="text-gray-600">Analysis Complete</p>
+                            </div>
+                            
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="font-semibold">Final Prediction:</span>
+                                    <span class="${data.final_prediction === 'REAL' ? 'text-green-600' : 'text-red-600'} font-bold">
+                                        ${data.final_prediction || 'Unknown'}
+                                    </span>
+                                </div>
+                                
+                                <div class="flex justify-between items-center">
+                                    <span class="font-semibold">Overall Confidence:</span>
+                                    <span class="text-blue-600 font-bold">${confidence}%</span>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-white shadow rounded-lg p-4">
+                                <h3 class="font-semibold mb-2">Detected Information:</h3>
+                                <div class="space-y-2 text-sm text-gray-600">
+                                    ${Object.entries(data.ocr_results || {}).map(([view, result]) => `
+                                        <div class="border-b pb-2">
+                                            <p class="font-medium">${view.charAt(0).toUpperCase() + view.slice(1)} View:</p>
+                                            <p class="whitespace-pre-line">${result.text}</p>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    `;
                     console.log("Response data:", data);
 
                     // Hide loading state

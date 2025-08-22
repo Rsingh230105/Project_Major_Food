@@ -19,7 +19,6 @@ class UploadView(TemplateView):
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 
-@method_decorator(csrf_exempt, name='dispatch')
 class FoodDetectorView(APIView):
     """
     API endpoint for food detection

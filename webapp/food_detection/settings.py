@@ -168,6 +168,10 @@ IMAGE_SIZE = (224, 224)  # MobileNetV2 input size
 ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/jpg']
 MAX_IMAGE_SIZE = 5 * 1024 * 1024  # 5MB max file size
 
+# Tesseract OCR settings
+TESSERACT_CMD = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+TESSDATA_PREFIX = r'C:\Program Files\Tesseract-OCR\tessdata'
+
 # Logging configuration
 LOGGING = {
     'version': 1,
