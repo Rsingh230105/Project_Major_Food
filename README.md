@@ -56,7 +56,7 @@ python manage.py runserver
 - TailwindCSS
 
 ## Contributors
-- [Your Name]
+- [Rajendra Singh]
 
 ## License
 [Your chosen license]
