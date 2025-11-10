@@ -22,7 +22,6 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include('detector.urls', namespace='detector_api')),  # API endpoints
     path('', include('detector.urls', namespace='detector')),  # Web interface
 ]
 

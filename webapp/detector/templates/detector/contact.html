@@ -1,0 +1,30 @@
+{% extends "detector/base.html" %}
+{% block title %}Contact - Fake Product Detector{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto py-16">
+    <h1 class="text-3xl font-bold text-center text-gray-900 mb-6">Contact Us</h1>
+    <p class="text-center text-gray-600 mb-8">If you have questions about the Fake Product Detector or need support, reach out to us.</p>
+
+    <div class="bg-white rounded-lg shadow p-6">
+        <form action="" method="post" class="space-y-4">
+            {% csrf_token %}
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Name</label>
+                <input type="text" name="name" class="form-input mt-1" placeholder="Your name">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Email</label>
+                <input type="email" name="email" class="form-input mt-1" placeholder="you@example.com">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Message</label>
+                <textarea name="message" rows="5" class="form-input mt-1" placeholder="How can we help?"></textarea>
+            </div>
+            <div>
+                <button type="submit" class="btn btn-primary">Send Message</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

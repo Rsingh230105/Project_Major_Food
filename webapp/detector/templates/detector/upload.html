@@ -1,77 +1,93 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Food Detector - Multi-View Analysis</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
-    <style>
-        .drop-zone {
-            transition: all 0.3s ease;
-        }
-        .drop-zone.dragover {
-            transform: scale(1.02);
-            border-color: #60A5FA;
-            background-color: #EFF6FF;
-        }
-        .preview-image {
-            transition: transform 0.3s ease;
-        }
-        .preview-image:hover {
-            transform: scale(1.05);
-        }
-        @keyframes slideIn {
-            from { transform: translateX(-20px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        .slide-in {
-            animation: slideIn 0.3s ease-out forwards;
-        }
-    </style>
-</head>
-<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
-    <div class="py-8 px-4 sm:px-6 lg:px-8">
-        <!-- Header -->
-        <div class="max-w-4xl mx-auto text-center mb-8">
-            <h1 class="text-4xl font-bold text-gray-900 mb-4">
-                <span class="text-blue-600">Food</span> Detector
-            </h1>
-            <p class="text-lg text-gray-600">
-                Upload multiple views of your food product for comprehensive authenticity analysis
-            </p>
+{% extends "detector/base.html" %}
+{% load static %}
+
+{% block title %}Upload Product - Fake Product Detector{% endblock %}
+
+{% block extra_css %}
+<style>
+    .drop-zone {
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    .drop-zone:hover {
+        border-color: #3B82F6;
+        background-color: #EFF6FF;
+    }
+    .drop-zone.dragover {
+        transform: scale(1.02);
+        border-color: #60A5FA;
+        background-color: #DBEAFE;
+    }
+    .preview-image {
+        transition: transform 0.3s ease;
+        border-radius: 8px;
+    }
+    .preview-image:hover {
+        transform: scale(1.05);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen py-8 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+    <!-- Header -->
+    <div class="max-w-5xl mx-auto text-center mb-10">
+        <div class="inline-block p-3 bg-blue-100 rounded-full mb-4">
+            <i class="fas fa-shield-alt text-4xl text-blue-600"></i>
         </div>
+        <h1 class="text-5xl font-extrabold text-gray-900 mb-4">
+            <span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">
+                Fake Product Detector
+            </span>
+        </h1>
+        <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+            Upload multiple views of your product for AI-powered authenticity analysis
+        </p>
+    </div>
 
-        <!-- Main Content -->
-        <div class="max-w-4xl mx-auto">
-            <div class="bg-white shadow-xl rounded-2xl overflow-hidden">
-                <div class="p-6 sm:p-8">
-                    <form id="uploadForm" class="space-y-6">
-                        {% csrf_token %}  <!-- Django CSRF Token -->
-                        <!-- Brand Name Input -->
-                        <div>
-                            <label for="brandName" class="block text-sm font-medium text-gray-700 mb-2">
-                                Brand Name
-                            </label>
-                            <input type="text" id="brandName" name="brand_name" required
-                                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
-                        </div>
+    <!-- Main Content -->
+    <div class="max-w-5xl mx-auto">
+        <div class="bg-white shadow-2xl rounded-3xl overflow-hidden">
+            <div class="p-8 sm:p-12">
+                <form id="uploadForm" class="space-y-8">
+                    {% csrf_token %}
+                    
+                    <!-- Brand Name Input -->
+                    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-xl">
+                        <label for="brandName" class="block text-lg font-semibold text-gray-800 mb-3">
+                            <i class="fas fa-tag mr-2 text-blue-600"></i>Brand Name
+                        </label>
+                        <input type="text" id="brandName" name="brand_name" required
+                            placeholder="Enter product brand name (e.g., Maggi, Parle-G)"
+                            class="w-full px-5 py-4 text-lg border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                    </div>
 
-                        <!-- Image Upload Sections -->
+                    <!-- Image Upload Sections -->
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                            <i class="fas fa-images mr-3 text-blue-600"></i>
+                            Upload Product Images
+                        </h2>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <!-- Front View -->
                             <div class="image-upload-section">
-                                <h3 class="text-lg font-medium text-gray-900 mb-2">Front View (Required)</h3>
-                                <div class="drop-zone border-4 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                                <div class="flex items-center justify-between mb-3">
+                                    <h3 class="text-lg font-semibold text-gray-800">Front View</h3>
+                                    <span class="px-3 py-1 bg-red-100 text-red-700 text-xs font-bold rounded-full">Required</span>
+                                </div>
+                                <div class="drop-zone border-4 border-dashed border-gray-300 rounded-2xl p-6 text-center hover:shadow-lg transition-all">
                                     <div class="upload-content">
-                                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                                        </svg>
-                                        <p class="mt-2 text-sm text-gray-500">Click to upload front view</p>
+                                        <i class="fas fa-cloud-upload-alt text-5xl text-gray-400 mb-3"></i>
+                                        <p class="text-base font-medium text-gray-700 mb-3">Drag & drop image here</p>
+                                        <button type="button" class="browse-btn px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium">
+                                            <i class="fas fa-folder-open mr-2"></i>Browse Files
+                                        </button>
                                     </div>
                                     <div class="preview-container hidden">
-                                        <img class="preview-image max-h-48 mx-auto" src="" alt="Preview">
-                                        <button type="button" class="remove-image mt-2 text-red-500 text-sm">Remove</button>
+                                        <img class="preview-image max-h-56 mx-auto shadow-lg" src="" alt="Preview">
+                                        <button type="button" class="remove-image mt-4 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition">
+                                            <i class="fas fa-trash mr-2"></i>Remove
+                                        </button>
                                     </div>
                                     <input type="file" class="hidden" name="images[]" accept="image/*" required data-view="front">
                                     <input type="hidden" name="view_types[]" value="front">
@@ -80,17 +96,23 @@
 
                             <!-- Back View -->
                             <div class="image-upload-section">
-                                <h3 class="text-lg font-medium text-gray-900 mb-2">Back View (Required)</h3>
-                                <div class="drop-zone border-4 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                                <div class="flex items-center justify-between mb-3">
+                                    <h3 class="text-lg font-semibold text-gray-800">Back View</h3>
+                                    <span class="px-3 py-1 bg-red-100 text-red-700 text-xs font-bold rounded-full">Required</span>
+                                </div>
+                                <div class="drop-zone border-4 border-dashed border-gray-300 rounded-2xl p-6 text-center hover:shadow-lg transition-all">
                                     <div class="upload-content">
-                                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                                        </svg>
-                                        <p class="mt-2 text-sm text-gray-500">Click to upload back view</p>
+                                        <i class="fas fa-cloud-upload-alt text-5xl text-gray-400 mb-3"></i>
+                                        <p class="text-base font-medium text-gray-700 mb-3">Drag & drop image here</p>
+                                        <button type="button" class="browse-btn px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium">
+                                            <i class="fas fa-folder-open mr-2"></i>Browse Files
+                                        </button>
                                     </div>
                                     <div class="preview-container hidden">
-                                        <img class="preview-image max-h-48 mx-auto" src="" alt="Preview">
-                                        <button type="button" class="remove-image mt-2 text-red-500 text-sm">Remove</button>
+                                        <img class="preview-image max-h-56 mx-auto shadow-lg" src="" alt="Preview">
+                                        <button type="button" class="remove-image mt-4 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition">
+                                            <i class="fas fa-trash mr-2"></i>Remove
+                                        </button>
                                     </div>
                                     <input type="file" class="hidden" name="images[]" accept="image/*" required data-view="back">
                                     <input type="hidden" name="view_types[]" value="back">
@@ -99,17 +121,23 @@
 
                             <!-- Side View -->
                             <div class="image-upload-section">
-                                <h3 class="text-lg font-medium text-gray-900 mb-2">Side View (Optional)</h3>
-                                <div class="drop-zone border-4 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                                <div class="flex items-center justify-between mb-3">
+                                    <h3 class="text-lg font-semibold text-gray-800">Side View</h3>
+                                    <span class="px-3 py-1 bg-gray-100 text-gray-600 text-xs font-bold rounded-full">Optional</span>
+                                </div>
+                                <div class="drop-zone border-4 border-dashed border-gray-300 rounded-2xl p-6 text-center hover:shadow-lg transition-all">
                                     <div class="upload-content">
-                                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                                        </svg>
-                                        <p class="mt-2 text-sm text-gray-500">Click to upload side view</p>
+                                        <i class="fas fa-cloud-upload-alt text-5xl text-gray-400 mb-3"></i>
+                                        <p class="text-base font-medium text-gray-700 mb-3">Drag & drop image here</p>
+                                        <button type="button" class="browse-btn px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium">
+                                            <i class="fas fa-folder-open mr-2"></i>Browse Files
+                                        </button>
                                     </div>
                                     <div class="preview-container hidden">
-                                        <img class="preview-image max-h-48 mx-auto" src="" alt="Preview">
-                                        <button type="button" class="remove-image mt-2 text-red-500 text-sm">Remove</button>
+                                        <img class="preview-image max-h-56 mx-auto shadow-lg" src="" alt="Preview">
+                                        <button type="button" class="remove-image mt-4 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition">
+                                            <i class="fas fa-trash mr-2"></i>Remove
+                                        </button>
                                     </div>
                                     <input type="file" class="hidden" name="images[]" accept="image/*" data-view="side">
                                     <input type="hidden" name="view_types[]" value="side">
@@ -118,335 +146,282 @@
 
                             <!-- Barcode View -->
                             <div class="image-upload-section">
-                                <h3 class="text-lg font-medium text-gray-900 mb-2">Barcode/QR (Optional)</h3>
-                                <div class="drop-zone border-4 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                                <div class="flex items-center justify-between mb-3">
+                                    <h3 class="text-lg font-semibold text-gray-800">Barcode/QR</h3>
+                                    <span class="px-3 py-1 bg-gray-100 text-gray-600 text-xs font-bold rounded-full">Optional</span>
+                                </div>
+                                <div class="drop-zone border-4 border-dashed border-gray-300 rounded-2xl p-6 text-center hover:shadow-lg transition-all">
                                     <div class="upload-content">
-                                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                                        </svg>
-                                        <p class="mt-2 text-sm text-gray-500">Click to upload barcode/QR</p>
+                                        <i class="fas fa-cloud-upload-alt text-5xl text-gray-400 mb-3"></i>
+                                        <p class="text-base font-medium text-gray-700 mb-3">Drag & drop image here</p>
+                                        <button type="button" class="browse-btn px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium">
+                                            <i class="fas fa-folder-open mr-2"></i>Browse Files
+                                        </button>
                                     </div>
                                     <div class="preview-container hidden">
-                                        <img class="preview-image max-h-48 mx-auto" src="" alt="Preview">
-                                        <button type="button" class="remove-image mt-2 text-red-500 text-sm">Remove</button>
+                                        <img class="preview-image max-h-56 mx-auto shadow-lg" src="" alt="Preview">
+                                        <button type="button" class="remove-image mt-4 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition">
+                                            <i class="fas fa-trash mr-2"></i>Remove
+                                        </button>
                                     </div>
                                     <input type="file" class="hidden" name="images[]" accept="image/*" data-view="barcode">
                                     <input type="hidden" name="view_types[]" value="barcode">
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        <!-- Submit Button -->
-                        <button type="submit" id="analyzeBtn" class="w-full bg-blue-600 text-white rounded-lg px-6 py-3 text-lg font-semibold hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transform transition-all duration-300 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                            Analyze All Images
+                    <!-- Submit Button -->
+                    <div class="pt-6">
+                        <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white text-xl font-bold py-5 px-8 rounded-xl hover:from-blue-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-200 shadow-xl">
+                            <i class="fas fa-search mr-3"></i>Analyze Product
                         </button>
-                    </form>
-                </div>
+                    </div>
 
-                <!-- Results Section -->
-                <div id="resultSection" class="hidden border-t border-gray-200">
-                    <div class="p-6 sm:p-8 bg-gray-50">
-                        <h3 class="text-xl font-semibold text-gray-900 mb-4">Analysis Results</h3>
-                        
-                        <!-- Loading Animation -->
-                        <div id="loadingSection" class="hidden text-center py-8">
-                            <lottie-player src="https://lottie.host/c7643828-7d69-4734-9b44-cea9e1271fbf/tDpGrR8Esd.json" 
-                                background="transparent" speed="1" style="height: 150px; margin: 0 auto;" loop autoplay>
-                            </lottie-player>
-                            <p class="text-gray-600 mt-4">Analyzing your image...</p>
-                        </div>
-
-                        <!-- Results Content -->
-                        <div id="resultContent" class="space-y-4">
-                            <!-- Results will be injected here -->
+                    <!-- Info Box -->
+                    <div class="bg-blue-50 border-l-4 border-blue-500 p-6 rounded-lg">
+                        <div class="flex items-start">
+                            <i class="fas fa-info-circle text-blue-500 text-2xl mr-4 mt-1"></i>
+                            <div>
+                                <h4 class="font-bold text-gray-900 mb-2">✨ Tips for best results:</h4>
+                                <ul class="text-sm text-gray-700 space-y-1">
+                                    <li>• Upload clear, well-lit images</li>
+                                    <li>• Include front and back views (required)</li>
+                                    <li>• Ensure text and labels are readable</li>
+                                    <li>• Maximum file size: 5MB per image</li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
-                </div>
+                </form>
             </div>
         </div>
+        
+        <!-- Advertisements Section -->
+        {% if advertisements %}
+        <div class="mt-12">
+            <h2 class="text-3xl font-bold text-gray-900 mb-6 text-center">📢 Awareness & Safety Tips</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for ad in advertisements %}
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition cursor-pointer" onclick="openAdModal('{{ ad.file.url }}', '{{ ad.title }}', '{{ ad.description }}', '{{ ad.content_type }}')">
+                    <div class="h-48 bg-gray-100 flex items-center justify-center overflow-hidden">
+                        {% if ad.file.name|slice:"-4:" == '.mp4' or ad.file.name|slice:"-4:" == '.avi' or ad.file.name|slice:"-5:" == '.webm' %}
+                            <div class="relative w-full h-full bg-black flex items-center justify-center">
+                                <i class="fas fa-play-circle text-6xl text-white opacity-80"></i>
+                            </div>
+                        {% else %}
+                            <img src="{{ ad.file.url }}" alt="{{ ad.title }}" class="max-w-full max-h-full object-contain">
+                        {% endif %}
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-bold text-lg text-gray-900 mb-2">{{ ad.title }}</h3>
+                        <p class="text-sm text-gray-600 line-clamp-2">{{ ad.description }}</p>
+                        <span class="inline-block mt-3 px-3 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full">
+                            {{ ad.get_content_type_display }}
+                        </span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
     </div>
+</div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const form = document.getElementById('uploadForm');
-            const analyzeBtn = document.getElementById('analyzeBtn');
-            const loadingSection = document.getElementById('loadingSection');
-            const resultSection = document.getElementById('resultSection');
-            const resultContent = document.getElementById('resultContent');
-            const dropZones = document.querySelectorAll('.drop-zone');
-            const requiredViews = ['front', 'back'];
+<!-- Advertisement Modal -->
+<div id="adModal" class="hidden fixed inset-0 bg-black bg-opacity-95 z-50 flex items-center justify-center" onclick="closeAdModal()">
+    <button onclick="closeAdModal()" class="absolute top-4 right-4 text-white text-4xl hover:text-gray-300 z-10">
+        <i class="fas fa-times"></i>
+    </button>
+    <div class="max-w-5xl w-full h-full p-8 flex flex-col items-center justify-center" onclick="event.stopPropagation()">
+        <div id="adImageViewer" class="hidden w-full flex flex-col items-center">
+            <img id="adImage" src="" alt="" class="max-w-full max-h-[70vh] object-contain shadow-2xl rounded-lg">
+        </div>
+        <div id="adVideoViewer" class="hidden w-full flex flex-col items-center">
+            <video id="adVideo" controls class="max-w-full max-h-[70vh] shadow-2xl rounded-lg">
+                <source src="" type="video/mp4">
+            </video>
+        </div>
+        <div class="mt-6 text-center max-w-2xl">
+            <h3 id="adTitle" class="text-2xl font-bold text-white mb-3"></h3>
+            <p id="adDescription" class="text-gray-300"></p>
+        </div>
+    </div>
+</div>
 
-            // Initialize each drop zone
-            dropZones.forEach(zone => {
-                const input = zone.querySelector('input[type="file"]');
-                const preview = zone.querySelector('.preview-container');
-                const uploadContent = zone.querySelector('.upload-content');
-                const previewImage = preview.querySelector('img');
-                const removeBtn = preview.querySelector('.remove-image');
-                const viewType = input.dataset.view;
-
-                // Click to upload
-                zone.addEventListener('click', () => input.click());
-
-                // Drag and drop handlers
-                zone.addEventListener('dragover', e => {
-                    e.preventDefault();
-                    zone.classList.add('dragover');
-                });
-
-                zone.addEventListener('dragleave', () => {
-                    zone.classList.remove('dragover');
-                });
-
-                zone.addEventListener('drop', e => {
-                    e.preventDefault();
-                    zone.classList.remove('dragover');
-                    if (e.dataTransfer.files.length) {
-                        handleFile(e.dataTransfer.files[0], input, preview, uploadContent, previewImage);
-                    }
-                });
-
-                // File input change handler
-                input.addEventListener('change', () => {
-                    if (input.files.length) {
-                        handleFile(input.files[0], input, preview, uploadContent, previewImage);
-                    }
-                });
-
-                // Remove button handler
-                removeBtn.addEventListener('click', e => {
-                    e.stopPropagation();
-                    input.value = '';
-                    preview.classList.add('hidden');
-                    uploadContent.classList.remove('hidden');
-                    updateSubmitButton();
-                });
-            });
-
-            function handleFile(file, input, preview, uploadContent, previewImage) {
-                if (validateFile(file)) {
-                    const reader = new FileReader();
-                    reader.onload = e => {
-                        previewImage.src = e.target.result;
-                        preview.classList.remove('hidden');
-                        uploadContent.classList.add('hidden');
-                    };
-                    reader.readAsDataURL(file);
-                    updateSubmitButton();
-                }
-            }
-
-            function validateFile(file) {
-                const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
-                const maxSize = 5 * 1024 * 1024; // 5MB
-
-                if (!validTypes.includes(file.type)) {
-                    alert('Please upload a valid image file (JPG, JPEG, or PNG)');
-                    return false;
-                }
-
-                if (file.size > maxSize) {
-                    alert('File size must be less than 5MB');
-                    return false;
-                }
-
-                return true;
-            }
-
-            function updateSubmitButton() {
-                const brandName = document.getElementById('brandName').value.trim();
-                const hasRequiredImages = requiredViews.every(view => {
-                    const input = document.querySelector(`input[data-view="${view}"]`);
-                    return input.files.length > 0;
-                });
-                analyzeBtn.disabled = !(brandName && hasRequiredImages);
-            }
-
-            // Brand name input handler
-            document.getElementById('brandName').addEventListener('input', updateSubmitButton);
-
-            // Form submission
-            form.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                
-                const formData = new FormData();
-                formData.append('brand_name', document.getElementById('brandName').value);
-                
-                // Append all uploaded images with their view types
-                document.querySelectorAll('input[type="file"]').forEach((input, index) => {
-                    if (input.files.length > 0) {
-                        const file = input.files[0];
-                        const viewType = input.dataset.view;
-                        formData.append(`images[]`, file);
-                        formData.append(`view_types[]`, viewType);
-                        console.log(`Appending ${file.name} as ${viewType}`);
-                    }
-                });
-
-                // Show loading state
-                loadingSection.classList.remove('hidden');
-                resultSection.classList.remove('hidden');
-                resultContent.classList.add('hidden');
-                analyzeBtn.disabled = true;
-
-                try {
-                    console.log("Submitting form data...");
-                    // Get CSRF token from cookie
-                    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-                    
-                    const response = await fetch('/api/detect/', {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRFToken': csrftoken
-                        },
-                        body: formData
-                    });
-
-                    console.log("Response received:", response.status);
-                    const data = await response.json();
-                    
-                    // Hide loading, show results
-                    loadingSection.classList.add('hidden');
-                    resultContent.classList.remove('hidden');
-                    
-                    // Format confidence as percentage
-                    const confidence = (data.overall_confidence * 100).toFixed(1);
-                    
-                    // Update result content
-                    resultContent.innerHTML = `
-                        <div class="space-y-6">
-                            <div class="text-center">
-                                <h2 class="text-2xl font-bold text-gray-900">${data.brand_name || document.getElementById('brandName').value}</h2>
-                                <p class="text-gray-600">Analysis Complete</p>
-                            </div>
-                            
-                            <div class="bg-gray-50 p-4 rounded-lg">
-                                <div class="flex justify-between items-center mb-2">
-                                    <span class="font-semibold">Final Prediction:</span>
-                                    <span class="${data.final_prediction === 'REAL' ? 'text-green-600' : 'text-red-600'} font-bold">
-                                        ${data.final_prediction || 'Unknown'}
-                                    </span>
-                                </div>
-                                
-                                <div class="flex justify-between items-center">
-                                    <span class="font-semibold">Overall Confidence:</span>
-                                    <span class="text-blue-600 font-bold">${confidence}%</span>
-                                </div>
-                            </div>
-                            
-                            <div class="bg-white shadow rounded-lg p-4">
-                                <h3 class="font-semibold mb-2">Detected Information:</h3>
-                                <div class="space-y-2 text-sm text-gray-600">
-                                    ${Object.entries(data.ocr_results || {}).map(([view, result]) => `
-                                        <div class="border-b pb-2">
-                                            <p class="font-medium">${view.charAt(0).toUpperCase() + view.slice(1)} View:</p>
-                                            <p class="whitespace-pre-line">${result.text}</p>
-                                        </div>
-                                    `).join('')}
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                    console.log("Response data:", data);
-
-                    // Hide loading state
-                    loadingSection.classList.add('hidden');
-                    resultContent.classList.remove('hidden');
-
-                    // Display results
-                    resultContent.innerHTML = `
-                        <div class="bg-white rounded-lg shadow-sm p-6 space-y-6">
-                            <div class="text-center pb-4 border-b">
-                                <h4 class="text-xl font-semibold text-gray-900">${data.brand_name || 'Unknown Brand'}</h4>
-                                <p class="text-gray-500 mt-1">Analysis Complete</p>
-                            </div>
-
-                            ${data.error ? `
-                                <div class="p-4 bg-red-50 text-red-600 rounded-lg">
-                                    <p>${data.error}</p>
-                                </div>
-                            ` : `
-                                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                                    <span class="text-lg font-medium">Final Prediction:</span>
-                                    <span class="text-xl font-bold ${data.final_prediction === 'REAL' ? 'text-green-600' : 'text-red-600'}">
-                                        ${data.final_prediction || 'Unknown'}
-                                    </span>
-                                </div>
-
-                                <div class="flex items-center justify-between p-4 bg-blue-50 rounded-lg">
-                                    <span class="text-lg font-medium">Overall Confidence:</span>
-                                    <span class="text-xl font-bold text-blue-600">
-                                        ${data.overall_confidence || 0}%
-                                    </span>
-                                </div>
-
-                                ${data.brand_match ? `
-                                    <div class="flex items-center justify-between p-4 bg-green-50 rounded-lg">
-                                        <span class="text-lg font-medium">Brand Match:</span>
-                                        <span class="text-xl font-bold text-green-600">Found</span>
-                                    </div>
-                                ` : ''}
-
-                                ${data.processing_time ? `
-                                    <div class="text-sm text-gray-500">
-                                        Processing Time: ${data.processing_time}s
-                                    </div>
-                                ` : ''}
-
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                                    ${data.images ? data.images.map(img => `
-                                        <div class="border rounded-lg p-4 slide-in">
-                                            <h5 class="font-medium text-gray-900 mb-2">${img.view_type_display || img.view_type}</h5>
-                                            <p class="text-sm text-gray-600">Prediction: ${img.prediction || 'Unknown'}</p>
-                                            <p class="text-sm text-gray-600">Confidence: ${img.confidence || 0}%</p>
-                                            ${img.detected_text ? `
-                                                <div class="mt-2 pt-2 border-t">
-                                                    <p class="text-sm text-gray-500">Detected Text:</p>
-                                                    <p class="text-sm">${img.detected_text}</p>
-                                                </div>
-                                            ` : ''}
-                                        </div>
-                                    `).join('') : ''}
-                                </div>
-
-                                ${data.ocr_results ? `
-                                    <div class="mt-4 pt-4 border-t">
-                                        <h6 class="font-medium text-gray-900 mb-2">OCR Results</h6>
-                                        <div class="space-y-2 text-sm text-gray-600">
-                                            ${data.ocr_results.extracted_brands?.length ? `
-                                                <p>Detected Brands: ${data.ocr_results.extracted_brands.join(', ')}</p>
-                                            ` : ''}
-                                            ${data.ocr_results.expiry_dates?.length ? `
-                                                <p>Expiry Dates: ${data.ocr_results.expiry_dates.join(', ')}</p>
-                                            ` : ''}
-                                            ${data.ocr_results.batch_numbers?.length ? `
-                                                <p>Batch Numbers: ${data.ocr_results.batch_numbers.join(', ')}</p>
-                                            ` : ''}
-                                            ${data.ocr_results.mrp_values?.length ? `
-                                                <p>MRP Values: ${data.ocr_results.mrp_values.join(', ')}</p>
-                                            ` : ''}
-                                        </div>
-                                    </div>
-                                ` : ''}
-                            `}
-                            </div>
-                        </div>
-                    `;
-
-                } catch (error) {
-                    console.error('Error:', error);
-                    loadingSection.classList.add('hidden');
-                    resultContent.classList.remove('hidden');
-                    resultContent.innerHTML = `
-                        <div class="bg-red-50 border border-red-200 rounded-lg p-4 text-red-600">
-                            Error: Unable to process images. Please try again.
-                        </div>
-                    `;
-                }
-
-                analyzeBtn.disabled = false;
-            });
+<script>
+// Image Upload Handler - Inline for immediate loading
+document.addEventListener('DOMContentLoaded', function() {
+    const uploadSections = document.querySelectorAll('.image-upload-section');
+    
+    uploadSections.forEach(section => {
+        const dropZone = section.querySelector('.drop-zone');
+        const fileInput = section.querySelector('input[type="file"]');
+        const uploadContent = section.querySelector('.upload-content');
+        const previewContainer = section.querySelector('.preview-container');
+        const previewImage = section.querySelector('.preview-image');
+        const removeBtn = section.querySelector('.remove-image');
+        
+        // Browse button click
+        const browseBtn = section.querySelector('.browse-btn');
+        browseBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            fileInput.click();
         });
-    </script>
-</body>
-</html>
+        
+        // File selection handler
+        fileInput.addEventListener('change', function(e) {
+            const file = this.files[0];
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImage.src = e.target.result;
+                    uploadContent.classList.add('hidden');
+                    previewContainer.classList.remove('hidden');
+                    dropZone.classList.add('border-green-500', 'bg-green-50');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        // Remove image
+        removeBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            fileInput.value = '';
+            previewImage.src = '';
+            uploadContent.classList.remove('hidden');
+            previewContainer.classList.add('hidden');
+            dropZone.classList.remove('border-green-500', 'bg-green-50');
+        });
+        
+        // Drag and drop
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+        
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+        
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('image/')) {
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                fileInput.files = dataTransfer.files;
+                fileInput.dispatchEvent(new Event('change'));
+            }
+        });
+    });
+    
+    // Form submission
+    const uploadForm = document.getElementById('uploadForm');
+    uploadForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const brandName = document.getElementById('brandName').value;
+        const formData = new FormData();
+        formData.append('brand_name', brandName);
+        
+        // Collect all uploaded images
+        const fileInputs = document.querySelectorAll('input[type="file"]');
+        const viewTypes = document.querySelectorAll('input[name="view_types[]"]');
+        
+        let imageCount = 0;
+        fileInputs.forEach((input, index) => {
+            if (input.files.length > 0) {
+                formData.append('images[]', input.files[0]);
+                formData.append('view_types[]', viewTypes[index].value);
+                imageCount++;
+            }
+        });
+        
+        if (imageCount < 2) {
+            alert('⚠️ Please upload at least Front and Back view images');
+            return;
+        }
+        
+        // Show loading
+        const submitBtn = uploadForm.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Analyzing Product...';
+        
+        try {
+            const response = await fetch('/api/detect/', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok) {
+                // Show success
+                submitBtn.innerHTML = '<i class="fas fa-check-circle mr-2"></i>Analysis Complete!';
+                submitBtn.classList.remove('from-blue-600', 'to-purple-600');
+                submitBtn.classList.add('from-green-500', 'to-green-600');
+                
+                setTimeout(() => {
+                    window.location.href = '/dashboard/';
+                }, 1500);
+            } else {
+                throw new Error(result.error || 'Upload failed');
+            }
+        } catch (error) {
+            alert('❌ ' + error.message);
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        }
+    });
+});
+
+// Advertisement modal functions
+function openAdModal(fileUrl, title, description, contentType) {
+    const modal = document.getElementById('adModal');
+    const imageViewer = document.getElementById('adImageViewer');
+    const videoViewer = document.getElementById('adVideoViewer');
+    
+    document.getElementById('adTitle').textContent = title;
+    document.getElementById('adDescription').textContent = description;
+    
+    // Check if it's a video file
+    const videoExtensions = ['.mp4', '.avi', '.webm', '.mov'];
+    const isVideo = videoExtensions.some(ext => fileUrl.toLowerCase().endsWith(ext));
+    
+    if (isVideo) {
+        document.getElementById('adVideo').querySelector('source').src = fileUrl;
+        document.getElementById('adVideo').load();
+        videoViewer.classList.remove('hidden');
+        imageViewer.classList.add('hidden');
+    } else {
+        document.getElementById('adImage').src = fileUrl;
+        imageViewer.classList.remove('hidden');
+        videoViewer.classList.add('hidden');
+    }
+    
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeAdModal() {
+    const modal = document.getElementById('adModal');
+    const video = document.getElementById('adVideo');
+    video.pause();
+    modal.classList.add('hidden');
+    document.body.style.overflow = 'auto';
+}
+
+// Close with Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeAdModal();
+    }
+});
+</script>
+{% endblock %}
