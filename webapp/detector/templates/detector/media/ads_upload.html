@@ -1,0 +1,147 @@
+{% extends "detector/base.html" %}
+{% load static %}
+
+{% block title %}Upload Advertisement - Fake Product Detector{% endblock %}
+
+{% block content %}
+<div class="py-8 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-900 mb-6">Upload Advertisement</h1>
+        
+        <div class="bg-white shadow rounded-lg p-6">
+            <form method="POST" enctype="multipart/form-data" class="space-y-6">
+                {% csrf_token %}
+                
+                <!-- Ad Type Selection -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Advertisement Type
+                    </label>
+                    <div class="grid grid-cols-2 gap-4">
+                        <button type="button" class="text-center p-4 border-2 border-gray-300 rounded-lg hover:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <i class="fas fa-image text-2xl mb-2"></i>
+                            <span class="block text-sm">Image Ad</span>
+                        </button>
+                        <button type="button" class="text-center p-4 border-2 border-gray-300 rounded-lg hover:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <i class="fas fa-video text-2xl mb-2"></i>
+                            <span class="block text-sm">Video Ad</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Ad Content Upload -->
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700">
+                        Advertisement Content
+                    </label>
+                    <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+                        <div class="space-y-1 text-center">
+                            <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                            <div class="flex text-sm text-gray-600">
+                                <label for="ad-upload" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
+                                    <span>Upload content</span>
+                                    <input id="ad-upload" name="ad" type="file" class="sr-only" accept="image/*,video/*">
+                                </label>
+                                <p class="pl-1">or drag and drop</p>
+                            </div>
+                            <p class="text-xs text-gray-500">
+                                PNG, JPG, MP4, AVI up to 100MB
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ad Details -->
+                <div class="space-y-4">
+                    <div>
+                        <label for="title" class="block text-sm font-medium text-gray-700">
+                            Advertisement Title
+                        </label>
+                        <input type="text" id="title" name="title" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    </div>
+
+                    <div>
+                        <label for="description" class="block text-sm font-medium text-gray-700">
+                            Description
+                        </label>
+                        <textarea id="description" name="description" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"></textarea>
+                    </div>
+
+                    <div>
+                        <label for="target-url" class="block text-sm font-medium text-gray-700">
+                            Target URL
+                        </label>
+                        <input type="url" id="target-url" name="target_url" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    </div>
+
+                    <div>
+                        <label for="duration" class="block text-sm font-medium text-gray-700">
+                            Display Duration (days)
+                        </label>
+                        <input type="number" id="duration" name="duration" min="1" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div>
+                    <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        Upload Advertisement
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    // Toggle ad type selection
+    const adTypeButtons = document.querySelectorAll('[type="button"]');
+    adTypeButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            adTypeButtons.forEach(btn => btn.classList.remove('border-blue-500'));
+            this.classList.add('border-blue-500');
+            
+            const fileInput = document.getElementById('ad-upload');
+            if (this.querySelector('span').textContent === 'Image Ad') {
+                fileInput.setAttribute('accept', 'image/*');
+            } else {
+                fileInput.setAttribute('accept', 'video/*');
+            }
+        });
+    });
+
+    // Preview uploaded content
+    document.getElementById('ad-upload').addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const preview = document.createElement('div');
+                preview.className = 'mt-4';
+                if (file.type.startsWith('image/')) {
+                    preview.innerHTML = `
+                        <img src="${e.target.result}" class="max-h-64 mx-auto rounded-lg">
+                    `;
+                } else if (file.type.startsWith('video/')) {
+                    preview.innerHTML = `
+                        <video controls class="max-h-64 mx-auto rounded-lg">
+                            <source src="${e.target.result}" type="${file.type}">
+                        </video>
+                    `;
+                }
+                const existingPreview = document.querySelector('.preview');
+                if (existingPreview) {
+                    existingPreview.remove();
+                }
+                preview.classList.add('preview');
+                this.parentElement.parentElement.parentElement.appendChild(preview);
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+</script>
+{% endblock %}
+{% endblock %}
