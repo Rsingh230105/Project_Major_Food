@@ -15,8 +15,8 @@ env/
 *.log
 db.sqlite3
 db.sqlite3-journal
-/media
-/staticfiles
+/webapp/media/
+/webapp/staticfiles/
 *.pot
 
 # Environment variables
@@ -34,6 +34,23 @@ db.sqlite3-journal
 .DS_Store
 Thumbs.db
 
-# Migrations (optional - uncomment if you don't want to track)
-# */migrations/*.py
-# !*/migrations/__init__.py
+# Batch files
+*.bat
+
+# Large ML model files
+*.h5
+*.pkl
+*.pth
+*.onnx
+
+# Migrations (keep structure only)
+*/migrations/*.py
+!*/migrations/__init__.py
+
+# Documentation files
+ADMIN_CREDENTIALS.txt
+COMPLETION_SUMMARY.md
+QUICK_REFERENCE.md
+SETUP_GUIDE.md
+TERMINAL_*.md
+GOOGLE_OAUTH_SETUP.md
