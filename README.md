@@ -1,4 +1,4 @@
-# Fake Food Detection System
+# Fake product Detection System
 
 This project aims to detect fake FMCG products using computer vision and machine learning techniques.
 
