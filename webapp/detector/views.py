@@ -15,6 +15,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.db import transaction
 from django.core.paginator import Paginator
+from django.utils import timezone
 import logging
 
 from .models import (CustomUser, UserProfile, FoodProduct, FoodImage, 
@@ -274,13 +275,14 @@ class ProductGalleryView(UserPassesTestMixin, TemplateView):
             'Packaging Verification',
             'Safety Guidelines'
         ]
-        context['gallery_items'] = GalleryItem.objects.all().order_by('-created_at')
+        # Show only approved items to non-staff, all items to staff
+        if self.request.user.is_staff:
+            context['gallery_items'] = GalleryItem.objects.all().order_by('-created_at')
+        else:
+            context['gallery_items'] = GalleryItem.objects.filter(status='approved').order_by('-created_at')
         return context
 
     def post(self, request, *args, **kwargs):
-        if not request.user.is_staff:
-            return redirect('detector:upload')
-
         try:
             files = request.FILES.getlist('images')
             title = request.POST.get('title')
@@ -288,14 +290,23 @@ class ProductGalleryView(UserPassesTestMixin, TemplateView):
             description = request.POST.get('description', '')
 
             for file in files:
+                # Admin uploads are auto-approved, user uploads need approval
+                status = 'approved' if request.user.is_staff else 'pending'
                 GalleryItem.objects.create(
                     title=title,
                     description=description,
                     category=category,
                     image=file,
-                    uploaded_by=request.user
+                    status=status,
+                    uploaded_by=request.user,
+                    approved_by=request.user if request.user.is_staff else None,
+                    approved_at=timezone.now() if request.user.is_staff else None
                 )
-            messages.success(request, "Gallery items uploaded successfully")
+            
+            if request.user.is_staff:
+                messages.success(request, "Gallery items uploaded and approved successfully")
+            else:
+                messages.success(request, "Gallery items uploaded! Waiting for admin approval.")
             return redirect('detector:gallery')
         except Exception as e:
             messages.error(request, f"Error uploading gallery items: {str(e)}")
@@ -308,11 +319,14 @@ class MediaLibraryView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
-        # Get all MediaItem objects directly
-        media_items = MediaItem.objects.all().order_by('-created_at')
+        # Show only approved items to non-staff
+        if self.request.user.is_authenticated and self.request.user.is_staff:
+            media_items = MediaItem.objects.all().order_by('-created_at')
+        else:
+            media_items = MediaItem.objects.filter(status='approved').order_by('-created_at')
         
         # Pagination
-        paginator = Paginator(media_items, 12)  # Show 12 items per page
+        paginator = Paginator(media_items, 12)
         page_number = self.request.GET.get('page')
         page_obj = paginator.get_page(page_number)
         

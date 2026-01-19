@@ -153,14 +153,24 @@ class GalleryItem(models.Model):
         ('packaging', 'Packaging Verification'),
         ('safety', 'Safety Guidelines')
     ]
+    
+    STATUS_CHOICES = [
+        ('pending', 'Pending Approval'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected')
+    ]
 
     title = models.CharField(max_length=200)
     description = models.TextField()
     category = models.CharField(max_length=20, choices=CATEGORIES)
     image = models.ImageField(upload_to='gallery/')
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
     created_at = models.DateTimeField(auto_now_add=True)
+    approved_at = models.DateTimeField(null=True, blank=True)
     is_featured = models.BooleanField(default=False)
     uploaded_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
+    approved_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True, related_name='approved_gallery_items')
+    rejection_reason = models.TextField(blank=True)
 
     def __str__(self):
         return f"{self.get_category_display()} - {self.title}"
@@ -175,15 +185,25 @@ class MediaItem(models.Model):
         ('video', 'Video'),
         ('document', 'Document')
     ]
+    
+    STATUS_CHOICES = [
+        ('pending', 'Pending Approval'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected')
+    ]
 
     title = models.CharField(max_length=200)
     description = models.TextField()
     file = models.FileField(upload_to='library/')
     media_type = models.CharField(max_length=20, choices=MEDIA_TYPES)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
     tags = models.JSONField(default=list)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    approved_at = models.DateTimeField(null=True, blank=True)
     uploaded_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
+    approved_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True, related_name='approved_media_items')
+    rejection_reason = models.TextField(blank=True)
 
     def __str__(self):
         return f"{self.get_media_type_display()} - {self.title}"

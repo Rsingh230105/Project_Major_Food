@@ -89,27 +89,59 @@ class AdvertisementAdmin(admin.ModelAdmin):
 @admin.register(GalleryItem)
 class GalleryItemAdmin(admin.ModelAdmin):
     """Gallery item admin"""
-    list_display = ('title', 'category', 'is_featured', 'uploaded_by', 'created_at')
-    list_filter = ('category', 'is_featured', 'created_at')
+    list_display = ('title', 'category', 'status', 'is_featured', 'uploaded_by', 'created_at')
+    list_filter = ('category', 'status', 'is_featured', 'created_at')
     search_fields = ('title', 'description')
     readonly_fields = ('created_at',)
+    actions = ['approve_items', 'reject_items']
+    
+    def approve_items(self, request, queryset):
+        from django.utils import timezone
+        queryset.update(status='approved', approved_by=request.user, approved_at=timezone.now())
+        self.message_user(request, f"{queryset.count()} items approved.")
+    approve_items.short_description = "Approve selected items"
+    
+    def reject_items(self, request, queryset):
+        queryset.update(status='rejected')
+        self.message_user(request, f"{queryset.count()} items rejected.")
+    reject_items.short_description = "Reject selected items"
     
     def save_model(self, request, obj, form, change):
-        if not change and not obj.uploaded_by:
+        if not change:
             obj.uploaded_by = request.user
+            obj.status = 'approved'
+            obj.approved_by = request.user
+            from django.utils import timezone
+            obj.approved_at = timezone.now()
         super().save_model(request, obj, form, change)
 
 @admin.register(MediaItem)
 class MediaItemAdmin(admin.ModelAdmin):
     """Media item admin"""
-    list_display = ('title', 'media_type', 'uploaded_by', 'created_at', 'updated_at')
-    list_filter = ('media_type', 'created_at')
+    list_display = ('title', 'media_type', 'status', 'uploaded_by', 'created_at')
+    list_filter = ('media_type', 'status', 'created_at')
     search_fields = ('title', 'description', 'tags')
     readonly_fields = ('created_at', 'updated_at')
+    actions = ['approve_items', 'reject_items']
+    
+    def approve_items(self, request, queryset):
+        from django.utils import timezone
+        queryset.update(status='approved', approved_by=request.user, approved_at=timezone.now())
+        self.message_user(request, f"{queryset.count()} items approved.")
+    approve_items.short_description = "Approve selected items"
+    
+    def reject_items(self, request, queryset):
+        queryset.update(status='rejected')
+        self.message_user(request, f"{queryset.count()} items rejected.")
+    reject_items.short_description = "Reject selected items"
     
     def save_model(self, request, obj, form, change):
-        if not change and not obj.uploaded_by:
+        if not change:
             obj.uploaded_by = request.user
+            obj.status = 'approved'
+            obj.approved_by = request.user
+            from django.utils import timezone
+            obj.approved_at = timezone.now()
         super().save_model(request, obj, form, change)
 
 @admin.register(UserActivity)

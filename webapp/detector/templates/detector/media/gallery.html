@@ -8,11 +8,11 @@
     <div class="flex justify-between items-center mb-8">
         <div>
             <h1 class="text-3xl font-bold text-gray-900">Product Gallery</h1>
-            <p class="mt-2 text-gray-600">Manage and organize product comparison images</p>
+            <p class="mt-2 text-gray-600">Share and view product comparison images</p>
         </div>
-        {% if user.is_staff %}
+        {% if user.is_authenticated %}
         <button onclick="toggleUploadModal()" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
-            <i class="fas fa-plus mr-2"></i>Add Images
+            <i class="fas fa-plus mr-2"></i>Upload Images
         </button>
         {% endif %}
     </div>
