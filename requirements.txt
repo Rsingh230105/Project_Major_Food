@@ -2,6 +2,7 @@ Django==5.2.3
 djangorestframework==3.14.0
 django-cors-headers==4.1.0
 django-allauth==0.63.3
+django-phonenumber-field==7.3.0
 python-dotenv==1.0.0
 whitenoise==6.9.0
 Pillow==11.3.0

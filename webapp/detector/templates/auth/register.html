@@ -92,21 +92,69 @@
 </div>
 
 <script>
-function signUpWithGoogle() {
-    // Placeholder - implement Google Sign Up logic
-    window.location.href = '#';
-}
-
-// Client-side password validation
-document.getElementById('confirm_password').addEventListener('input', function() {
-    const password = document.getElementById('password').value;
-    const confirmPassword = this.value;
+// Client-side validation
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const password1 = document.querySelector('input[name="password1"]');
+    const password2 = document.querySelector('input[name="password2"]');
     
-    if (password !== confirmPassword) {
-        this.setCustomValidity('Passwords do not match');
-    } else {
-        this.setCustomValidity('');
+    // Password confirmation validation
+    function validatePasswordConfirmation() {
+        if (password1.value !== password2.value) {
+            password2.setCustomValidity('Passwords do not match');
+            password2.classList.add('border-red-500');
+            return false;
+        } else {
+            password2.setCustomValidity('');
+            password2.classList.remove('border-red-500');
+            return true;
+        }
     }
+    
+    password2.addEventListener('input', validatePasswordConfirmation);
+    password1.addEventListener('input', validatePasswordConfirmation);
+    
+    // Form submission validation
+    form.addEventListener('submit', function(e) {
+        if (!validatePasswordConfirmation()) {
+            e.preventDefault();
+            alert('Passwords do not match. Please check and try again.');
+            return false;
+        }
+        
+        // Additional validations
+        const email = document.querySelector('input[name="email"]');
+        const firstName = document.querySelector('input[name="first_name"]');
+        const lastName = document.querySelector('input[name="last_name"]');
+        
+        if (!email.value.match(/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/)) {
+            e.preventDefault();
+            alert('Please enter a valid email address.');
+            email.focus();
+            return false;
+        }
+        
+        if (firstName.value.length < 2) {
+            e.preventDefault();
+            alert('First name must be at least 2 characters long.');
+            firstName.focus();
+            return false;
+        }
+        
+        if (lastName.value.length < 2) {
+            e.preventDefault();
+            alert('Last name must be at least 2 characters long.');
+            lastName.focus();
+            return false;
+        }
+        
+        if (password1.value.length < 8) {
+            e.preventDefault();
+            alert('Password must be at least 8 characters long and contain uppercase, lowercase, and number.');
+            password1.focus();
+            return false;
+        }
+    });
 });
 </script>
 {% endblock %}

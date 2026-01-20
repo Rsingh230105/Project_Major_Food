@@ -103,9 +103,38 @@
 </div>
 
     <script>
-function signInWithGoogle() {
-    // Placeholder - implement Google Sign In logic
-    window.location.href = '#';
-}
+// Client-side validation for login form
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const email = document.querySelector('input[name="username"]');
+    const password = document.querySelector('input[name="password"]');
+    
+    form.addEventListener('submit', function(e) {
+        let isValid = true;
+        
+        // Validate email
+        if (!email.value.trim()) {
+            alert('Please enter your email address.');
+            email.focus();
+            e.preventDefault();
+            return false;
+        }
+        
+        if (!email.value.match(/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/)) {
+            alert('Please enter a valid email address.');
+            email.focus();
+            e.preventDefault();
+            return false;
+        }
+        
+        // Validate password
+        if (!password.value.trim()) {
+            alert('Please enter your password.');
+            password.focus();
+            e.preventDefault();
+            return false;
+        }
+    });
+});
 </script>
 {% endblock %}

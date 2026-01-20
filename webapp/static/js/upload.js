@@ -75,7 +75,53 @@ document.addEventListener('DOMContentLoaded', function() {
         uploadForm.addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            const brandName = document.getElementById('brandName').value;
+            const brandName = document.getElementById('brandName').value.trim();
+            
+            // Client-side validation
+            if (!brandName) {
+                alert('Please enter a brand name.');
+                document.getElementById('brandName').focus();
+                return;
+            }
+            
+            if (brandName.length < 2) {
+                alert('Brand name must be at least 2 characters long.');
+                document.getElementById('brandName').focus();
+                return;
+            }
+            
+            // Check for required images (front and back)
+            const frontInput = document.querySelector('input[data-view="front"]');
+            const backInput = document.querySelector('input[data-view="back"]');
+            
+            if (!frontInput.files.length) {
+                alert('Please upload a front view image (required).');
+                frontInput.click();
+                return;
+            }
+            
+            if (!backInput.files.length) {
+                alert('Please upload a back view image (required).');
+                backInput.click();
+                return;
+            }
+            
+            // Validate file types and sizes
+            const allInputs = document.querySelectorAll('input[type="file"]');
+            for (let input of allInputs) {
+                if (input.files.length > 0) {
+                    const file = input.files[0];
+                    if (!file.type.startsWith('image/')) {
+                        alert('Please upload only image files.');
+                        return;
+                    }
+                    if (file.size > 5 * 1024 * 1024) { // 5MB
+                        alert('File size must be less than 5MB.');
+                        return;
+                    }
+                }
+            }
+            
             const formData = new FormData();
             
             formData.append('brand_name', brandName);

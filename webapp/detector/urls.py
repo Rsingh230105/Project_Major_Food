@@ -5,7 +5,8 @@ app_name = 'detector'
 
 urlpatterns = [
     # Main pages
-    path('', views.UploadView.as_view(), name='upload'),
+    path('', views.HomeView.as_view(), name='home'),
+    path('upload/', views.UploadView.as_view(), name='upload'),
     path('about/', views.AboutView.as_view(), name='about'),
     path('contact/', views.ContactView.as_view(), name='contact'),
     
@@ -16,6 +17,7 @@ urlpatterns = [
     
     # User dashboard and profile
     path('dashboard/', views.DashboardView.as_view(), name='dashboard'),
+    path('analyses/', views.AnalysesView.as_view(), name='analyses'),
     path('profile/', views.ProfileView.as_view(), name='profile'),
     path('settings/', views.SettingsView.as_view(), name='settings'),
     

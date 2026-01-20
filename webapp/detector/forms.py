@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth import authenticate
+from phonenumber_field.widgets import PhoneNumber
 from .models import CustomUser, UserProfile
 
 class CustomUserRegistrationForm(UserCreationForm):
@@ -9,7 +10,9 @@ class CustomUserRegistrationForm(UserCreationForm):
         required=True,
         widget=forms.EmailInput(attrs={
             'class': 'appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm',
-            'placeholder': 'Email address'
+            'placeholder': 'Email address',
+            'required': 'required',
+            'pattern': r'[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$'
         })
     )
     first_name = forms.CharField(
@@ -17,7 +20,9 @@ class CustomUserRegistrationForm(UserCreationForm):
         required=True,
         widget=forms.TextInput(attrs={
             'class': 'appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm',
-            'placeholder': 'First Name'
+            'placeholder': 'First Name',
+            'required': 'required',
+            'minlength': '2'
         })
     )
     last_name = forms.CharField(
@@ -25,19 +30,25 @@ class CustomUserRegistrationForm(UserCreationForm):
         required=True,
         widget=forms.TextInput(attrs={
             'class': 'appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm',
-            'placeholder': 'Last Name'
+            'placeholder': 'Last Name',
+            'required': 'required',
+            'minlength': '2'
         })
     )
     password1 = forms.CharField(
         widget=forms.PasswordInput(attrs={
             'class': 'appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm',
-            'placeholder': 'Password'
+            'placeholder': 'Password (min 8 characters)',
+            'required': 'required',
+            'minlength': '8',
+            'pattern': r'(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}'
         })
     )
     password2 = forms.CharField(
         widget=forms.PasswordInput(attrs={
             'class': 'appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm',
-            'placeholder': 'Confirm Password'
+            'placeholder': 'Confirm Password',
+            'required': 'required'
         })
     )
 
@@ -66,13 +77,15 @@ class CustomUserLoginForm(AuthenticationForm):
     username = forms.EmailField(
         widget=forms.EmailInput(attrs={
             'class': 'appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm',
-            'placeholder': 'Email address'
+            'placeholder': 'Email address',
+            'required': 'required'
         })
     )
     password = forms.CharField(
         widget=forms.PasswordInput(attrs={
             'class': 'appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm',
-            'placeholder': 'Password'
+            'placeholder': 'Password',
+            'required': 'required'
         })
     )
 

@@ -13,7 +13,7 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from django.db import transaction
+from django.db.models import Q
 from django.core.paginator import Paginator
 from django.utils import timezone
 import logging
@@ -54,6 +54,9 @@ class UploadView(TemplateView):
 
 class AboutView(TemplateView):
     template_name = 'detector/about.html'
+
+class HomeView(TemplateView):
+    template_name = 'detector/home.html'
 
 class ContactView(TemplateView):
     template_name = 'detector/contact.html'
@@ -200,6 +203,40 @@ class ProfileView(LoginRequiredMixin, View):
             'profile': profile,
         }
         return render(request, self.template_name, context)
+
+class AnalysesView(LoginRequiredMixin, TemplateView):
+    """View for displaying user's analysis history with search and pagination"""
+    template_name = 'detector/analyses.html'
+    login_url = '/login/'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        
+        # Get search query
+        search_query = self.request.GET.get('search', '')
+        
+        # Get all user's products
+        products = FoodProduct.objects.filter(user=user).order_by('-created_at')
+        
+        if search_query:
+            products = products.filter(
+                Q(brand_name__icontains=search_query) |
+                Q(final_prediction__icontains=search_query) |
+                Q(analysis_notes__icontains=search_query)
+            )
+        
+        # Pagination
+        paginator = Paginator(products, 10)  # 10 items per page
+        page_number = self.request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+        
+        context.update({
+            'products': page_obj,
+            'search_query': search_query,
+            'total_analyses': products.count(),
+        })
+        return context
 
 class SettingsView(LoginRequiredMixin, TemplateView):
     """User settings view"""
