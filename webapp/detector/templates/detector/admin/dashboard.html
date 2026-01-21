@@ -1,0 +1,205 @@
+{% extends "detector/base.html" %}
+{% load static %}
+
+{% block title %}Admin Dashboard - Media Management{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900">Media Management Dashboard</h1>
+            <p class="mt-2 text-gray-600">Manage awareness content, media library, and gallery items</p>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <!-- Advertisements -->
+            <div class="bg-white overflow-hidden shadow rounded-lg">
+                <div class="p-5">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-bullhorn text-2xl text-blue-600"></i>
+                        </div>
+                        <div class="ml-5 w-0 flex-1">
+                            <dl>
+                                <dt class="text-sm font-medium text-gray-500 truncate">Advertisements</dt>
+                                <dd class="text-lg font-medium text-gray-900">{{ total_advertisements }}</dd>
+                                <dd class="text-sm text-green-600">{{ active_advertisements }} active</dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-5 py-3">
+                    <div class="text-sm">
+                        <a href="{% url 'detector:admin_advertisements' %}" class="font-medium text-blue-600 hover:text-blue-500">View all</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Media Items -->
+            <div class="bg-white overflow-hidden shadow rounded-lg">
+                <div class="p-5">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-photo-video text-2xl text-green-600"></i>
+                        </div>
+                        <div class="ml-5 w-0 flex-1">
+                            <dl>
+                                <dt class="text-sm font-medium text-gray-500 truncate">Media Library</dt>
+                                <dd class="text-lg font-medium text-gray-900">{{ total_media_items }}</dd>
+                                <dd class="text-sm text-yellow-600">{{ pending_media_items }} pending</dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-5 py-3">
+                    <div class="text-sm">
+                        <a href="{% url 'detector:admin_media' %}" class="font-medium text-blue-600 hover:text-blue-500">Manage media</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gallery Items -->
+            <div class="bg-white overflow-hidden shadow rounded-lg">
+                <div class="p-5">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-images text-2xl text-purple-600"></i>
+                        </div>
+                        <div class="ml-5 w-0 flex-1">
+                            <dl>
+                                <dt class="text-sm font-medium text-gray-500 truncate">Gallery Items</dt>
+                                <dd class="text-lg font-medium text-gray-900">{{ total_gallery_items }}</dd>
+                                <dd class="text-sm text-blue-600">{{ featured_gallery_items }} featured</dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-5 py-3">
+                    <div class="text-sm">
+                        <a href="{% url 'detector:admin_gallery' %}" class="font-medium text-blue-600 hover:text-blue-500">View gallery</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="bg-white overflow-hidden shadow rounded-lg">
+                <div class="p-5">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-plus-circle text-2xl text-indigo-600"></i>
+                        </div>
+                        <div class="ml-5 w-0 flex-1">
+                            <dl>
+                                <dt class="text-sm font-medium text-gray-500 truncate">Quick Actions</dt>
+                                <dd class="text-sm text-gray-900 mt-1">
+                                    <a href="{% url 'detector:admin_advertisement_create' %}" class="text-blue-600 hover:text-blue-500 block">Add Advertisement</a>
+                                    <a href="{% url 'detector:admin_media_create' %}" class="text-green-600 hover:text-green-500 block">Upload Media</a>
+                                    <a href="{% url 'detector:admin_gallery_create' %}" class="text-purple-600 hover:text-purple-500 block">Add Gallery Item</a>
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Recent Advertisements -->
+            <div class="bg-white shadow rounded-lg">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-medium text-gray-900">Recent Advertisements</h3>
+                </div>
+                <div class="p-6">
+                    {% if recent_advertisements %}
+                        <div class="space-y-4">
+                            {% for ad in recent_advertisements %}
+                            <div class="flex items-center space-x-3">
+                                <div class="flex-shrink-0">
+                                    {% if ad.is_active %}
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Active</span>
+                                    {% else %}
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">Inactive</span>
+                                    {% endif %}
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-medium text-gray-900 truncate">{{ ad.title }}</p>
+                                    <p class="text-sm text-gray-500">{{ ad.created_at|date:"M d, Y" }}</p>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-gray-500 text-center py-4">No advertisements yet</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Recent Media Items -->
+            <div class="bg-white shadow rounded-lg">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-medium text-gray-900">Recent Media Items</h3>
+                </div>
+                <div class="p-6">
+                    {% if recent_media %}
+                        <div class="space-y-4">
+                            {% for media in recent_media %}
+                            <div class="flex items-center space-x-3">
+                                <div class="flex-shrink-0">
+                                    {% if media.media_type == 'image' %}
+                                        <i class="fas fa-image text-blue-500"></i>
+                                    {% elif media.media_type == 'video' %}
+                                        <i class="fas fa-video text-red-500"></i>
+                                    {% else %}
+                                        <i class="fas fa-file text-gray-500"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-medium text-gray-900 truncate">{{ media.title }}</p>
+                                    <p class="text-sm text-gray-500">{{ media.created_at|date:"M d, Y" }}</p>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium
+                                        {% if media.status == 'approved' %}bg-green-100 text-green-800
+                                        {% elif media.status == 'pending' %}bg-yellow-100 text-yellow-800
+                                        {% else %}bg-red-100 text-red-800{% endif %}">
+                                        {{ media.get_status_display }}
+                                    </span>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-gray-500 text-center py-4">No media items yet</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Public Links -->
+        <div class="mt-8 bg-white shadow rounded-lg">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Public Access Links</h3>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <a href="{% url 'detector:media_library' %}" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
+                        <i class="fas fa-photo-video text-2xl text-blue-600 mr-3"></i>
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-900">Media Library</h4>
+                            <p class="text-sm text-gray-500">View approved media content</p>
+                        </div>
+                    </a>
+                    <a href="{% url 'detector:awareness' %}" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
+                        <i class="fas fa-shield-alt text-2xl text-green-600 mr-3"></i>
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-900">Awareness Campaigns</h4>
+                            <p class="text-sm text-gray-500">Food safety awareness content</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

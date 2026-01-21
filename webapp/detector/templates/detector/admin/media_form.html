@@ -1,0 +1,181 @@
+{% extends "detector/base.html" %}
+{% load static %}
+
+{% block title %}{{ action }} Media Item{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="flex items-center">
+                <a href="{% url 'detector:admin_media' %}" class="text-green-600 hover:text-green-500 mr-4">
+                    <i class="fas fa-arrow-left"></i> Back to Media Library
+                </a>
+            </div>
+            <h1 class="text-3xl font-bold text-gray-900 mt-4">{{ action }} Media Item</h1>
+            <p class="mt-2 text-gray-600">Upload images, videos, or documents for food safety awareness</p>
+        </div>
+
+        <!-- Form -->
+        <div class="bg-white shadow rounded-lg">
+            <form method="POST" enctype="multipart/form-data" class="space-y-6 p-6">
+                {% csrf_token %}
+                
+                <!-- Title -->
+                <div>
+                    <label for="{{ form.title.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                        Title <span class="text-red-500">*</span>
+                    </label>
+                    {{ form.title }}
+                    {% if form.title.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.title.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Description -->
+                <div>
+                    <label for="{{ form.description.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                        Description <span class="text-red-500">*</span>
+                    </label>
+                    {{ form.description }}
+                    {% if form.description.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.description.errors.0 }}</p>
+                    {% endif %}
+                    <p class="mt-1 text-sm text-gray-500">Describe the media content and its relevance to food safety</p>
+                </div>
+
+                <!-- Media Type -->
+                <div>
+                    <label for="{{ form.media_type.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                        Media Type <span class="text-red-500">*</span>
+                    </label>
+                    {{ form.media_type }}
+                    {% if form.media_type.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.media_type.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- File Upload -->
+                <div>
+                    <label for="{{ form.file.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                        Media File <span class="text-red-500">*</span>
+                    </label>
+                    {{ form.file }}
+                    {% if form.file.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.file.errors.0 }}</p>
+                    {% endif %}
+                    <p class="mt-1 text-sm text-gray-500" id="file-help">
+                        Upload your media file. Supported formats will be shown based on media type selection.
+                    </p>
+                    {% if media_item and media_item.file %}
+                    <div class="mt-2">
+                        <p class="text-sm text-gray-600">Current file: <a href="{{ media_item.file.url }}" target="_blank" class="text-blue-600 hover:text-blue-500">{{ media_item.file.name }}</a></p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Tags -->
+                <div>
+                    <label for="{{ form.tags_input.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                        Tags
+                    </label>
+                    {{ form.tags_input }}
+                    {% if form.tags_input.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.tags_input.errors.0 }}</p>
+                    {% endif %}
+                    <p class="mt-1 text-sm text-gray-500">Enter tags separated by commas (e.g., fssai, safety, awareness, news)</p>
+                </div>
+
+                <!-- Submit Buttons -->
+                <div class="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+                    <a href="{% url 'detector:admin_media' %}" 
+                       class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        Cancel
+                    </a>
+                    <button type="submit" 
+                            class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                        <i class="fas fa-save mr-2"></i>{{ action }} Media Item
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Help Section -->
+        <div class="mt-8 bg-green-50 border border-green-200 rounded-lg p-6">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-lightbulb text-green-400"></i>
+                </div>
+                <div class="ml-3">
+                    <h3 class="text-sm font-medium text-green-800">Media Upload Guidelines</h3>
+                    <div class="mt-2 text-sm text-green-700">
+                        <ul class="list-disc pl-5 space-y-1">
+                            <li><strong>Images:</strong> High-quality photos of food products, safety guidelines, or awareness posters (JPG, PNG, GIF)</li>
+                            <li><strong>Videos:</strong> Educational content about food safety, FSSAI guidelines, or awareness campaigns (MP4, AVI)</li>
+                            <li><strong>Documents:</strong> Official FSSAI guidelines, safety manuals, or news articles (PDF, DOC, DOCX)</li>
+                            <li>Use descriptive titles and detailed descriptions to help users understand the content</li>
+                            <li>Add relevant tags like "fssai", "safety", "awareness", "news" for better organization</li>
+                            <li>All uploads will be reviewed before being made public</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Dynamic file type help based on media type selection
+const mediaTypeSelect = document.getElementById('{{ form.media_type.id_for_label }}');
+const fileHelp = document.getElementById('file-help');
+const fileInput = document.getElementById('{{ form.file.id_for_label }}');
+
+const helpText = {
+    'image': 'Upload high-quality images (JPG, PNG, GIF) for food safety awareness visuals.',
+    'video': 'Upload educational videos (MP4, AVI) about food safety and FSSAI guidelines.',
+    'document': 'Upload official documents (PDF, DOC, DOCX) containing safety guidelines or news.'
+};
+
+const acceptedTypes = {
+    'image': 'image/*',
+    'video': 'video/*',
+    'document': '.pdf,.doc,.docx'
+};
+
+function updateFileHelp() {
+    const selectedType = mediaTypeSelect.value;
+    if (selectedType && helpText[selectedType]) {
+        fileHelp.textContent = helpText[selectedType];
+        fileInput.accept = acceptedTypes[selectedType];
+    }
+}
+
+mediaTypeSelect.addEventListener('change', updateFileHelp);
+updateFileHelp(); // Initialize on page load
+
+// File validation
+fileInput.addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    const selectedType = mediaTypeSelect.value;
+    
+    if (file && selectedType) {
+        let isValid = false;
+        
+        if (selectedType === 'image' && file.type.startsWith('image/')) {
+            isValid = true;
+        } else if (selectedType === 'video' && file.type.startsWith('video/')) {
+            isValid = true;
+        } else if (selectedType === 'document') {
+            const docTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+            isValid = docTypes.includes(file.type);
+        }
+        
+        if (!isValid) {
+            alert(`Please select a valid ${selectedType} file.`);
+            e.target.value = '';
+        }
+    }
+});
+</script>
+{% endblock %}

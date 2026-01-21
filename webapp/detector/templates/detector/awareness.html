@@ -1,0 +1,253 @@
+{% extends "detector/base.html" %}
+{% load static %}
+
+{% block title %}Food Safety Awareness - FSSAI Guidelines & Campaigns{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+    <!-- Hero Section -->
+    <div class="bg-gradient-to-r from-blue-600 to-green-600 text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+            <div class="text-center">
+                <h1 class="text-4xl font-bold mb-4">Food Safety Awareness</h1>
+                <p class="text-xl mb-8">Stay informed with FSSAI guidelines, safety tips, and awareness campaigns</p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <a href="#campaigns" class="bg-white text-blue-600 px-6 py-3 rounded-md font-medium hover:bg-gray-100 transition-colors">
+                        <i class="fas fa-bullhorn mr-2"></i>View Campaigns
+                    </a>
+                    <a href="#gallery" class="bg-green-600 text-white px-6 py-3 rounded-md font-medium hover:bg-green-700 transition-colors">
+                        <i class="fas fa-images mr-2"></i>Real vs Fake Gallery
+                    </a>
+                    <a href="{% url 'detector:media_library' %}" class="bg-blue-500 text-white px-6 py-3 rounded-md font-medium hover:bg-blue-600 transition-colors">
+                        <i class="fas fa-photo-video mr-2"></i>Media Library
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <!-- Safety Tips Banner -->
+        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-6 mb-12 rounded-r-lg">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-exclamation-triangle text-yellow-400 text-2xl"></i>
+                </div>
+                <div class="ml-3">
+                    <h3 class="text-lg font-medium text-yellow-800">Important Safety Reminder</h3>
+                    <p class="mt-2 text-yellow-700">
+                        Always check for FSSAI license numbers, expiry dates, and packaging integrity. 
+                        Report suspicious products to your local food safety authority.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Campaigns Section -->
+        <section id="campaigns" class="mb-16">
+            <div class="flex items-center justify-between mb-8">
+                <h2 class="text-3xl font-bold text-gray-900">Active Awareness Campaigns</h2>
+                <a href="{% url 'detector:media_library' %}" class="text-blue-600 hover:text-blue-500 font-medium">
+                    View All Media <i class="fas fa-arrow-right ml-1"></i>
+                </a>
+            </div>
+
+            {% if advertisements %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {% for ad in advertisements %}
+                <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
+                    <!-- Campaign Content -->
+                    <div class="p-6">
+                        <div class="flex items-center mb-4">
+                            <i class="fas fa-bullhorn text-blue-600 text-xl mr-3"></i>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                {{ ad.get_content_type_display }}
+                            </span>
+                        </div>
+                        
+                        <h3 class="text-xl font-semibold text-gray-900 mb-3">{{ ad.title }}</h3>
+                        <p class="text-gray-600 mb-4">{{ ad.description|truncatechars:150 }}</p>
+                        
+                        <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+                            <span>Active for {{ ad.duration_days }} days</span>
+                            <span>{{ ad.created_at|date:"M d, Y" }}</span>
+                        </div>
+
+                        {% if ad.file %}
+                        <div class="border-t pt-4">
+                            <a href="{{ ad.file.url }}" target="_blank" 
+                               class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+                                {% if ad.file.url|slice:"-4:" == '.pdf' %}
+                                    <i class="fas fa-file-pdf mr-2"></i>View Document
+                                {% elif ad.file.url|slice:"-4:" in '.mp4,.avi,.mov' %}
+                                    <i class="fas fa-play mr-2"></i>Watch Video
+                                {% else %}
+                                    <i class="fas fa-eye mr-2"></i>View Content
+                                {% endif %}
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-12 bg-white rounded-lg shadow">
+                <i class="fas fa-bullhorn text-6xl text-gray-300 mb-4"></i>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">No active campaigns</h3>
+                <p class="text-gray-500">Check back later for new awareness campaigns and safety information.</p>
+            </div>
+            {% endif %}
+        </section>
+
+        <!-- Featured Gallery Section -->
+        <section id="gallery" class="mb-16">
+            <div class="flex items-center justify-between mb-8">
+                <h2 class="text-3xl font-bold text-gray-900">Real vs Fake Comparison Gallery</h2>
+                <span class="text-sm text-gray-500">Learn to identify genuine products</span>
+            </div>
+
+            {% if featured_gallery %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                {% for item in featured_gallery %}
+                <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
+                    <div class="aspect-w-16 aspect-h-9 bg-gray-100">
+                        <img src="{{ item.image.url }}" alt="{{ item.title }}" class="w-full h-48 object-cover">
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center mb-2">
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                {{ item.get_category_display }}
+                            </span>
+                            {% if item.is_featured %}
+                            <span class="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                <i class="fas fa-star mr-1"></i>Featured
+                            </span>
+                            {% endif %}
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">{{ item.title }}</h3>
+                        <p class="text-sm text-gray-600 mb-3">{{ item.description|truncatechars:100 }}</p>
+                        <div class="text-xs text-gray-500">{{ item.created_at|date:"M d, Y" }}</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% if gallery_items %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {% for item in gallery_items %}
+                <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
+                    <div class="aspect-w-16 aspect-h-9 bg-gray-100">
+                        <img src="{{ item.image.url }}" alt="{{ item.title }}" class="w-full h-32 object-cover">
+                    </div>
+                    <div class="p-3">
+                        <h4 class="text-sm font-medium text-gray-900 mb-1">{{ item.title }}</h4>
+                        <p class="text-xs text-gray-600 mb-2">{{ item.description|truncatechars:60 }}</p>
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs text-gray-500">{{ item.get_category_display }}</span>
+                            {% if item.is_featured %}
+                            <i class="fas fa-star text-yellow-500 text-xs"></i>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-12 bg-white rounded-lg shadow">
+                <i class="fas fa-images text-6xl text-gray-300 mb-4"></i>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">Gallery coming soon</h3>
+                <p class="text-gray-500">We're preparing educational content to help you identify genuine products.</p>
+            </div>
+            {% endif %}
+        </section>
+
+        <!-- Safety Guidelines Section -->
+        <section class="bg-white rounded-lg shadow p-8">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">Food Safety Guidelines</h2>
+                <p class="text-gray-600">Essential tips for safe food consumption</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="text-center">
+                    <div class="bg-green-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-search text-green-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Check Labels</h3>
+                    <p class="text-gray-600 text-sm">Always verify FSSAI license numbers, manufacturing dates, and expiry information.</p>
+                </div>
+
+                <div class="text-center">
+                    <div class="bg-blue-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-store text-blue-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Buy from Trusted Sources</h3>
+                    <p class="text-gray-600 text-sm">Purchase from licensed retailers and check for proper storage conditions.</p>
+                </div>
+
+                <div class="text-center">
+                    <div class="bg-red-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-exclamation-triangle text-red-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Report Issues</h3>
+                    <p class="text-gray-600 text-sm">Report suspicious or unsafe products to FSSAI or local food safety authorities.</p>
+                </div>
+
+                <div class="text-center">
+                    <div class="bg-yellow-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-utensils text-yellow-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Proper Storage</h3>
+                    <p class="text-gray-600 text-sm">Store food products according to manufacturer instructions and local climate conditions.</p>
+                </div>
+
+                <div class="text-center">
+                    <div class="bg-purple-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-eye text-purple-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Visual Inspection</h3>
+                    <p class="text-gray-600 text-sm">Check for signs of tampering, unusual colors, or damaged packaging.</p>
+                </div>
+
+                <div class="text-center">
+                    <div class="bg-indigo-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-mobile-alt text-indigo-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Use Our Detector</h3>
+                    <p class="text-gray-600 text-sm">Upload product images to our AI detector for instant authenticity verification.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Information -->
+        <section class="mt-12 bg-gray-100 rounded-lg p-8">
+            <div class="text-center">
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">Need Help?</h2>
+                <p class="text-gray-600 mb-6">Contact FSSAI or local food safety authorities for assistance</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white p-4 rounded-lg">
+                        <i class="fas fa-phone text-blue-600 text-2xl mb-2"></i>
+                        <h3 class="font-semibold text-gray-900">Emergency Helpline</h3>
+                        <p class="text-gray-600 text-sm">1800-11-2100</p>
+                    </div>
+                    
+                    <div class="bg-white p-4 rounded-lg">
+                        <i class="fas fa-globe text-green-600 text-2xl mb-2"></i>
+                        <h3 class="font-semibold text-gray-900">Official Website</h3>
+                        <p class="text-gray-600 text-sm">fssai.gov.in</p>
+                    </div>
+                    
+                    <div class="bg-white p-4 rounded-lg">
+                        <i class="fas fa-envelope text-purple-600 text-2xl mb-2"></i>
+                        <h3 class="font-semibold text-gray-900">Report Issues</h3>
+                        <p class="text-gray-600 text-sm">complaints@fssai.gov.in</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}

@@ -24,11 +24,28 @@ urlpatterns = [
     # API endpoints
     path('api/detect/', views.FoodDetectorView.as_view(), name='detect_food'),
     
-    # Media Management URLs (Admin only)
-    path('media/ads/', views.AdsUploadView.as_view(), name='upload_ads'),
-    path('media/gallery/', views.ProductGalleryView.as_view(), name='gallery'),
+    # Custom Admin Interface (Staff only)
+    path('admin/dashboard/', views.MediaAdminDashboard.as_view(), name='admin_dashboard'),
+    path('admin/advertisements/', views.AdvertisementListView.as_view(), name='admin_advertisements'),
+    path('admin/advertisements/create/', views.AdvertisementCreateView.as_view(), name='admin_advertisement_create'),
+    path('admin/advertisements/<int:pk>/update/', views.AdvertisementUpdateView.as_view(), name='admin_advertisement_update'),
+    path('admin/advertisements/<int:pk>/delete/', views.AdvertisementDeleteView.as_view(), name='admin_advertisement_delete'),
+    
+    path('admin/media/', views.MediaItemListView.as_view(), name='admin_media'),
+    path('admin/media/create/', views.MediaItemCreateView.as_view(), name='admin_media_create'),
+    path('admin/media/<int:pk>/update/', views.MediaItemUpdateView.as_view(), name='admin_media_update'),
+    path('admin/media/<int:pk>/approve/', views.MediaItemApproveView.as_view(), name='admin_media_approve'),
+    path('admin/media/<int:pk>/delete/', views.MediaItemDeleteView.as_view(), name='admin_media_delete'),
+    
+    path('admin/gallery/', views.GalleryItemListView.as_view(), name='admin_gallery'),
+    path('admin/gallery/create/', views.GalleryItemCreateView.as_view(), name='admin_gallery_create'),
+    path('admin/gallery/<int:pk>/update/', views.GalleryItemUpdateView.as_view(), name='admin_gallery_update'),
+    path('admin/gallery/<int:pk>/approve/', views.GalleryItemApproveView.as_view(), name='admin_gallery_approve'),
+    path('admin/gallery/<int:pk>/delete/', views.GalleryItemDeleteView.as_view(), name='admin_gallery_delete'),
+    
+    # Public Media Display
     path('media/library/', views.MediaLibraryView.as_view(), name='media_library'),
-    path('media/delete/<int:pk>/', views.DeleteMediaView.as_view(), name='delete_media'),
+    path('awareness/', views.AwarenessCampaignView.as_view(), name='awareness'),
     
     # Django-allauth URLs
     # path('accounts/', include('allauth.urls')),

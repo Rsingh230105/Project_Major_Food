@@ -1,0 +1,146 @@
+{% extends "detector/base.html" %}
+{% load static %}
+
+{% block title %}{{ action }} Advertisement{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="flex items-center">
+                <a href="{% url 'detector:admin_advertisements' %}" class="text-blue-600 hover:text-blue-500 mr-4">
+                    <i class="fas fa-arrow-left"></i> Back to Advertisements
+                </a>
+            </div>
+            <h1 class="text-3xl font-bold text-gray-900 mt-4">{{ action }} Advertisement</h1>
+            <p class="mt-2 text-gray-600">Create awareness content for food safety campaigns</p>
+        </div>
+
+        <!-- Form -->
+        <div class="bg-white shadow rounded-lg">
+            <form method="POST" enctype="multipart/form-data" class="space-y-6 p-6">
+                {% csrf_token %}
+                
+                <!-- Title -->
+                <div>
+                    <label for="{{ form.title.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                        Title <span class="text-red-500">*</span>
+                    </label>
+                    {{ form.title }}
+                    {% if form.title.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.title.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Description -->
+                <div>
+                    <label for="{{ form.description.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                        Description <span class="text-red-500">*</span>
+                    </label>
+                    {{ form.description }}
+                    {% if form.description.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.description.errors.0 }}</p>
+                    {% endif %}
+                    <p class="mt-1 text-sm text-gray-500">Describe the awareness content, safety guidelines, or campaign details</p>
+                </div>
+
+                <!-- Content Type -->
+                <div>
+                    <label for="{{ form.content_type.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                        Content Type <span class="text-red-500">*</span>
+                    </label>
+                    {{ form.content_type }}
+                    {% if form.content_type.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.content_type.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- File Upload -->
+                <div>
+                    <label for="{{ form.file.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                        Media File <span class="text-red-500">*</span>
+                    </label>
+                    {{ form.file }}
+                    {% if form.file.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.file.errors.0 }}</p>
+                    {% endif %}
+                    <p class="mt-1 text-sm text-gray-500">Upload images, videos, or documents (PDF, DOC, etc.) for awareness content</p>
+                    {% if advertisement and advertisement.file %}
+                    <div class="mt-2">
+                        <p class="text-sm text-gray-600">Current file: <a href="{{ advertisement.file.url }}" target="_blank" class="text-blue-600 hover:text-blue-500">{{ advertisement.file.name }}</a></p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Duration -->
+                <div>
+                    <label for="{{ form.duration_days.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                        Duration (Days) <span class="text-red-500">*</span>
+                    </label>
+                    {{ form.duration_days }}
+                    {% if form.duration_days.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.duration_days.errors.0 }}</p>
+                    {% endif %}
+                    <p class="mt-1 text-sm text-gray-500">How long should this content be active?</p>
+                </div>
+
+                <!-- Active Status -->
+                <div class="flex items-center">
+                    {{ form.is_active }}
+                    <label for="{{ form.is_active.id_for_label }}" class="ml-2 block text-sm text-gray-900">
+                        Make this advertisement active
+                    </label>
+                </div>
+
+                <!-- Submit Buttons -->
+                <div class="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+                    <a href="{% url 'detector:admin_advertisements' %}" 
+                       class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        Cancel
+                    </a>
+                    <button type="submit" 
+                            class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        <i class="fas fa-save mr-2"></i>{{ action }} Advertisement
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Help Section -->
+        <div class="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-info-circle text-blue-400"></i>
+                </div>
+                <div class="ml-3">
+                    <h3 class="text-sm font-medium text-blue-800">Content Guidelines</h3>
+                    <div class="mt-2 text-sm text-blue-700">
+                        <ul class="list-disc pl-5 space-y-1">
+                            <li>Use clear, informative titles that describe the safety topic</li>
+                            <li>Include specific safety guidelines, FSSAI recommendations, or official news</li>
+                            <li>Upload high-quality images or videos that support the message</li>
+                            <li>Set appropriate duration based on the importance and relevance of the content</li>
+                            <li>Ensure content is accurate and based on official food safety guidelines</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// File type validation
+document.getElementById('{{ form.file.id_for_label }}').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'video/mp4', 'video/avi', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+        if (!allowedTypes.includes(file.type)) {
+            alert('Please select a valid file type (images, videos, or documents)');
+            e.target.value = '';
+        }
+    }
+});
+</script>
+{% endblock %}

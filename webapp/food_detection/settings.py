@@ -220,7 +220,7 @@ REST_FRAMEWORK = {
 }
 
 # ML Model settings
-ML_MODEL_PATH = os.getenv('ML_MODEL_PATH', BASE_DIR.parent / 'models' / 'food_detector.h5')
+ML_MODEL_PATH = os.getenv('ML_MODEL_PATH', BASE_DIR.parent / 'models' / 'mobilenet_v2_food.h5')
 IMAGE_SIZE = (224, 224)  # MobileNetV2 input size
 ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/jpg']
 MAX_IMAGE_SIZE = 5 * 1024 * 1024  # 5MB max file size

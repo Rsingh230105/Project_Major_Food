@@ -16,6 +16,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q
 from django.core.paginator import Paginator
 from django.utils import timezone
+from django.db import transaction
 import logging
 
 from .models import (CustomUser, UserProfile, FoodProduct, FoodImage, 
@@ -486,3 +487,365 @@ class FoodDetectorView(APIView):
         except Exception as e:
             logger.error(f"Error processing food detection request: {str(e)}")
             return Response({'error': 'Internal server error occurred'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# Custom Admin Interface Views
+
+class AdminRequiredMixin(UserPassesTestMixin):
+    """Mixin to ensure user is admin/staff"""
+    def test_func(self):
+        return self.request.user.is_authenticated and self.request.user.is_staff
+
+class MediaAdminDashboard(AdminRequiredMixin, TemplateView):
+    """Custom admin dashboard for media management"""
+    template_name = 'detector/admin/dashboard.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'total_advertisements': Advertisement.objects.count(),
+            'active_advertisements': Advertisement.objects.filter(is_active=True).count(),
+            'total_media_items': MediaItem.objects.count(),
+            'approved_media_items': MediaItem.objects.filter(status='approved').count(),
+            'pending_media_items': MediaItem.objects.filter(status='pending').count(),
+            'total_gallery_items': GalleryItem.objects.count(),
+            'featured_gallery_items': GalleryItem.objects.filter(is_featured=True).count(),
+            'recent_advertisements': Advertisement.objects.select_related('uploaded_by').order_by('-created_at')[:5],
+            'recent_media': MediaItem.objects.select_related('uploaded_by').order_by('-created_at')[:5],
+        })
+        return context
+
+class AdvertisementListView(AdminRequiredMixin, TemplateView):
+    """List all advertisements with management options"""
+    template_name = 'detector/admin/advertisements.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        advertisements = Advertisement.objects.select_related('uploaded_by').order_by('-created_at')
+        
+        # Search functionality
+        search_query = self.request.GET.get('search', '')
+        if search_query:
+            advertisements = advertisements.filter(
+                Q(title__icontains=search_query) |
+                Q(description__icontains=search_query) |
+                Q(content_type__icontains=search_query)
+            )
+        
+        # Pagination
+        paginator = Paginator(advertisements, 10)
+        page_number = self.request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+        
+        context.update({
+            'advertisements': page_obj,
+            'search_query': search_query,
+        })
+        return context
+
+class AdvertisementCreateView(AdminRequiredMixin, View):
+    """Create new advertisement"""
+    
+    def get(self, request):
+        form = AdvertisementForm()
+        return render(request, 'detector/admin/advertisement_form.html', {'form': form, 'action': 'Create'})
+    
+    def post(self, request):
+        form = AdvertisementForm(request.POST, request.FILES)
+        if form.is_valid():
+            advertisement = form.save(commit=False)
+            advertisement.uploaded_by = request.user
+            advertisement.save()
+            messages.success(request, 'Advertisement created successfully!')
+            return redirect('detector:admin_advertisements')
+        
+        return render(request, 'detector/admin/advertisement_form.html', {'form': form, 'action': 'Create'})
+
+class AdvertisementUpdateView(AdminRequiredMixin, View):
+    """Update existing advertisement"""
+    
+    def get(self, request, pk):
+        advertisement = get_object_or_404(Advertisement, pk=pk)
+        form = AdvertisementForm(instance=advertisement)
+        return render(request, 'detector/admin/advertisement_form.html', {'form': form, 'action': 'Update', 'advertisement': advertisement})
+    
+    def post(self, request, pk):
+        advertisement = get_object_or_404(Advertisement, pk=pk)
+        form = AdvertisementForm(request.POST, request.FILES, instance=advertisement)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Advertisement updated successfully!')
+            return redirect('detector:admin_advertisements')
+        
+        return render(request, 'detector/admin/advertisement_form.html', {'form': form, 'action': 'Update', 'advertisement': advertisement})
+
+class AdvertisementDeleteView(AdminRequiredMixin, View):
+    """Delete advertisement"""
+    
+    def post(self, request, pk):
+        advertisement = get_object_or_404(Advertisement, pk=pk)
+        advertisement.delete()
+        messages.success(request, 'Advertisement deleted successfully!')
+        return redirect('detector:admin_advertisements')
+
+class MediaItemListView(AdminRequiredMixin, TemplateView):
+    """List all media items with management options"""
+    template_name = 'detector/admin/media_items.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        media_items = MediaItem.objects.select_related('uploaded_by', 'approved_by').order_by('-created_at')
+        
+        # Search functionality
+        search_query = self.request.GET.get('search', '')
+        if search_query:
+            media_items = media_items.filter(
+                Q(title__icontains=search_query) |
+                Q(description__icontains=search_query) |
+                Q(media_type__icontains=search_query)
+            )
+        
+        # Filter by status
+        status_filter = self.request.GET.get('status', '')
+        if status_filter:
+            media_items = media_items.filter(status=status_filter)
+        
+        # Pagination
+        paginator = Paginator(media_items, 12)
+        page_number = self.request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+        
+        context.update({
+            'media_items': page_obj,
+            'search_query': search_query,
+            'status_filter': status_filter,
+        })
+        return context
+
+class MediaItemCreateView(AdminRequiredMixin, View):
+    """Create new media item"""
+    
+    def get(self, request):
+        form = MediaItemForm()
+        return render(request, 'detector/admin/media_form.html', {'form': form, 'action': 'Create'})
+    
+    def post(self, request):
+        form = MediaItemForm(request.POST, request.FILES)
+        if form.is_valid():
+            media_item = form.save(commit=False)
+            media_item.uploaded_by = request.user
+            media_item.save()
+            messages.success(request, 'Media item created successfully!')
+            return redirect('detector:admin_media')
+        
+        return render(request, 'detector/admin/media_form.html', {'form': form, 'action': 'Create'})
+
+class MediaItemUpdateView(AdminRequiredMixin, View):
+    """Update existing media item"""
+    
+    def get(self, request, pk):
+        media_item = get_object_or_404(MediaItem, pk=pk)
+        form = MediaItemForm(instance=media_item)
+        return render(request, 'detector/admin/media_form.html', {'form': form, 'action': 'Update', 'media_item': media_item})
+    
+    def post(self, request, pk):
+        media_item = get_object_or_404(MediaItem, pk=pk)
+        form = MediaItemForm(request.POST, request.FILES, instance=media_item)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Media item updated successfully!')
+            return redirect('detector:admin_media')
+        
+        return render(request, 'detector/admin/media_form.html', {'form': form, 'action': 'Update', 'media_item': media_item})
+
+class MediaItemApproveView(AdminRequiredMixin, View):
+    """Approve or reject media item"""
+    
+    def post(self, request, pk):
+        media_item = get_object_or_404(MediaItem, pk=pk)
+        action = request.POST.get('action')
+        
+        if action == 'approve':
+            media_item.status = 'approved'
+            media_item.approved_by = request.user
+            media_item.approved_at = timezone.now()
+            media_item.rejection_reason = ''
+            messages.success(request, 'Media item approved successfully!')
+        elif action == 'reject':
+            media_item.status = 'rejected'
+            media_item.rejection_reason = request.POST.get('rejection_reason', '')
+            messages.success(request, 'Media item rejected!')
+        
+        media_item.save()
+        return redirect('detector:admin_media')
+
+class MediaItemDeleteView(AdminRequiredMixin, View):
+    """Delete media item"""
+    
+    def post(self, request, pk):
+        media_item = get_object_or_404(MediaItem, pk=pk)
+        media_item.delete()
+        messages.success(request, 'Media item deleted successfully!')
+        return redirect('detector:admin_media')
+
+class GalleryItemListView(AdminRequiredMixin, TemplateView):
+    """List all gallery items"""
+    template_name = 'detector/admin/gallery.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        gallery_items = GalleryItem.objects.select_related('uploaded_by', 'approved_by').order_by('-created_at')
+        
+        # Search functionality
+        search_query = self.request.GET.get('search', '')
+        if search_query:
+            gallery_items = gallery_items.filter(
+                Q(title__icontains=search_query) |
+                Q(description__icontains=search_query) |
+                Q(category__icontains=search_query)
+            )
+        
+        # Pagination
+        paginator = Paginator(gallery_items, 12)
+        page_number = self.request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+        
+        context.update({
+            'gallery_items': page_obj,
+            'search_query': search_query,
+        })
+        return context
+
+class GalleryItemCreateView(AdminRequiredMixin, View):
+    """Create new gallery item"""
+    
+    def get(self, request):
+        form = GalleryItemForm()
+        return render(request, 'detector/admin/gallery_form.html', {'form': form, 'action': 'Create'})
+    
+    def post(self, request):
+        form = GalleryItemForm(request.POST, request.FILES)
+        if form.is_valid():
+            gallery_item = form.save(commit=False)
+            gallery_item.uploaded_by = request.user
+            gallery_item.save()
+            messages.success(request, 'Gallery item created successfully!')
+            return redirect('detector:admin_gallery')
+        
+        return render(request, 'detector/admin/gallery_form.html', {'form': form, 'action': 'Create'})
+
+class GalleryItemUpdateView(AdminRequiredMixin, View):
+    """Update existing gallery item"""
+    
+    def get(self, request, pk):
+        gallery_item = get_object_or_404(GalleryItem, pk=pk)
+        form = GalleryItemForm(instance=gallery_item)
+        return render(request, 'detector/admin/gallery_form.html', {'form': form, 'action': 'Update', 'gallery_item': gallery_item})
+    
+    def post(self, request, pk):
+        gallery_item = get_object_or_404(GalleryItem, pk=pk)
+        form = GalleryItemForm(request.POST, request.FILES, instance=gallery_item)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Gallery item updated successfully!')
+            return redirect('detector:admin_gallery')
+        
+        return render(request, 'detector/admin/gallery_form.html', {'form': form, 'action': 'Update', 'gallery_item': gallery_item})
+
+class GalleryItemApproveView(AdminRequiredMixin, View):
+    """Approve gallery item"""
+    
+    def post(self, request, pk):
+        gallery_item = get_object_or_404(GalleryItem, pk=pk)
+        action = request.POST.get('action')
+        
+        if action == 'approve':
+            gallery_item.status = 'approved'
+            gallery_item.approved_by = request.user
+            gallery_item.approved_at = timezone.now()
+            gallery_item.rejection_reason = ''
+            messages.success(request, 'Gallery item approved successfully!')
+        elif action == 'reject':
+            gallery_item.status = 'rejected'
+            gallery_item.rejection_reason = request.POST.get('rejection_reason', '')
+            messages.success(request, 'Gallery item rejected!')
+        elif action == 'feature':
+            gallery_item.is_featured = not gallery_item.is_featured
+            gallery_item.save()
+            status_msg = 'featured' if gallery_item.is_featured else 'unfeatured'
+            messages.success(request, f'Gallery item {status_msg} successfully!')
+        
+        gallery_item.save()
+        return redirect('detector:admin_gallery')
+
+class GalleryItemDeleteView(AdminRequiredMixin, View):
+    """Delete gallery item"""
+    
+    def post(self, request, pk):
+        gallery_item = get_object_or_404(GalleryItem, pk=pk)
+        gallery_item.delete()
+        messages.success(request, 'Gallery item deleted successfully!')
+        return redirect('detector:admin_gallery')
+
+
+# Public Media Display Views
+
+class MediaLibraryView(TemplateView):
+    """Public view for media library - shows approved media items"""
+    template_name = 'detector/media_library.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Only show approved media items
+        media_items = MediaItem.objects.filter(status='approved').order_by('-created_at')
+        
+        # Filter by media type
+        media_type = self.request.GET.get('type', '')
+        if media_type:
+            media_items = media_items.filter(media_type=media_type)
+        
+        # Search functionality
+        search_query = self.request.GET.get('search', '')
+        if search_query:
+            media_items = media_items.filter(
+                Q(title__icontains=search_query) |
+                Q(description__icontains=search_query) |
+                Q(tags__icontains=search_query)
+            )
+        
+        # Pagination
+        paginator = Paginator(media_items, 12)
+        page_number = self.request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+        
+        context.update({
+            'media_items': page_obj,
+            'search_query': search_query,
+            'media_type': media_type,
+            'media_types': MediaItem.MEDIA_TYPES,
+        })
+        return context
+
+class AwarenessCampaignView(TemplateView):
+    """Public view for awareness campaigns and advertisements"""
+    template_name = 'detector/awareness.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Get active advertisements
+        advertisements = Advertisement.objects.filter(is_active=True).order_by('-created_at')
+        
+        # Get approved gallery items
+        gallery_items = GalleryItem.objects.filter(status='approved').order_by('-created_at')
+        
+        # Featured items
+        featured_gallery = gallery_items.filter(is_featured=True)[:6]
+        
+        context.update({
+            'advertisements': advertisements,
+            'gallery_items': gallery_items,
+            'featured_gallery': featured_gallery,
+        })
+        return context
